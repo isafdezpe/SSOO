@@ -31,6 +31,9 @@ void ComputerSystem_PowerOn(int argc, char *argv[], int paramIndex) {
 	// Prepare if necesary the assert system
 	Asserts_LoadAsserts();
 
+	// Print program list
+	ComputerSystem_PrintProgramList();
+
 	// Request the OS to do the initial set of tasks. The last one will be
 	// the processor allocation to the process with the highest priority
 	OperatingSystem_Initialize(daemonsBaseIndex);
@@ -49,3 +52,11 @@ void ComputerSystem_PowerOff() {
 
 /////////////////////////////////////////////////////////
 //  New functions below this line  //////////////////////
+void ComputerSystem_PrintProgramList() {
+	int i;
+	ComputerSystem_DebugMessage(101, INIT); 
+	for (i = 1; i < PROGRAMSMAXNUMBER; i++) {
+		if (programList[i] != NULL)
+			ComputerSystem_DebugMessage(102, INIT, programList[i]->executableName, programList[i]->arrivalTime); 
+	}
+}

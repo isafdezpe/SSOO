@@ -123,11 +123,20 @@ int OperatingSystem_LongTermScheduler() {
 	
 	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER ; i++) {
 		PID=OperatingSystem_CreateProcess(i);
-		numberOfSuccessfullyCreatedProcesses++;
-		if (programList[i]->type==USERPROGRAM) 
-			numberOfNotTerminatedUserProcesses++;
-		// Move process to the ready state
-		OperatingSystem_MoveToTheREADYState(PID);
+		if (PID == NOFREEENTRY)
+			ComputerSystem_DebugMessage(103, ERROR, programList[i] -> executableName);
+		else if (PID == PROGRAMDOESNOTEXIST)
+			ComputerSystem_DebugMessage(104, ERROR, programList[i] -> executableName, "it does not exist");
+		else if (PID == PROGRAMNOTVALID)
+			ComputerSystem_DebugMessage(104, ERROR, programList[i] -> executableName, "invalid priority or size");
+		else {
+			numberOfSuccessfullyCreatedProcesses++;
+			if (programList[i]->type==USERPROGRAM) 
+				numberOfNotTerminatedUserProcesses++;
+			// Move process to the ready state
+			OperatingSystem_MoveToTheREADYState(PID);
+		}
+		
 	}
 
 	// Return the number of succesfully created processes
@@ -148,9 +157,22 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	// Obtain a process ID
 	PID=OperatingSystem_ObtainAnEntryInTheProcessTable();
 
+	// Check for free entries at proccess table
+	if (PID == NOFREEENTRY) {
+		return NOFREEENTRY;
+	}
+
 	// Obtain the memory requirements of the program
 	processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);	
 
+	// Check if the program is valid
+	if (processSize == PROGRAMDOESNOTEXIST) {
+		return PROGRAMDOESNOTEXIST;
+	}
+	if (processSize == PROGRAMNOTVALID) {
+		return PROGRAMNOTVALID;
+	}
+	
 	// Obtain the priority for the process
 	priority=OperatingSystem_ObtainPriority(programFile);
 	

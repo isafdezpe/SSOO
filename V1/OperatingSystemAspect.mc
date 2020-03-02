@@ -33,7 +33,8 @@ extern char defaultDebugLevel[];
 
 void ComputerSystem_PowerOn(int argc, char *argv[], int);
 void ComputerSystem_PowerOff();
-# 33 "ComputerSystem.h"
+void ComputerSystem_PrintProgramList();
+# 34 "ComputerSystem.h"
 typedef struct ProgramData {
     char *executableName;
     unsigned int arrivalTime;
@@ -2832,11 +2833,20 @@ int OperatingSystem_LongTermScheduler() {
 # 124 "OperatingSystem.c"
                                && i<20 ; i++) {
   PID=OperatingSystem_CreateProcess(i);
-  numberOfSuccessfullyCreatedProcesses++;
-  if (programList[i]->type==USERPROGRAM)
-   numberOfNotTerminatedUserProcesses++;
+  if (PID == -3)
+   ComputerSystem_DebugMessage(103, 'e', programList[i] -> executableName);
+  else if (PID == -1)
+   ComputerSystem_DebugMessage(104, 'e', programList[i] -> executableName, "it does not exist");
+  else if (PID == -2)
+   ComputerSystem_DebugMessage(104, 'e', programList[i] -> executableName, "invalid priority or size");
+  else {
+   numberOfSuccessfullyCreatedProcesses++;
+   if (programList[i]->type==USERPROGRAM)
+    numberOfNotTerminatedUserProcesses++;
 
-  OperatingSystem_MoveToTheREADYState(PID);
+   OperatingSystem_MoveToTheREADYState(PID);
+  }
+
  }
 
 
@@ -2858,7 +2868,20 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
  PID=OperatingSystem_ObtainAnEntryInTheProcessTable();
 
 
+ if (PID == -3) {
+  return -3;
+ }
+
+
  processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);
+
+
+ if (processSize == -1) {
+  return -1;
+ }
+ if (processSize == -2) {
+  return -2;
+ }
 
 
  priority=OperatingSystem_ObtainPriority(programFile);
