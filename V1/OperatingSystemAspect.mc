@@ -2886,6 +2886,10 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 
  priority=OperatingSystem_ObtainPriority(programFile);
 
+ if (priority == -2) {
+  return -2;
+ }
+
 
   loadingPhysicalAddress=OperatingSystem_ObtainMainMemory(processSize, PID);
 
