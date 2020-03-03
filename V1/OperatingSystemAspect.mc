@@ -2839,6 +2839,8 @@ int OperatingSystem_LongTermScheduler() {
    ComputerSystem_DebugMessage(104, 'e', programList[i] -> executableName, "it does not exist");
   else if (PID == -2)
    ComputerSystem_DebugMessage(104, 'e', programList[i] -> executableName, "invalid priority or size");
+  else if (PID == -4)
+   ComputerSystem_DebugMessage(105, 'e', programList[i] -> executableName);
   else {
    numberOfSuccessfullyCreatedProcesses++;
    if (programList[i]->type==USERPROGRAM)
@@ -2861,6 +2863,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
  int processSize;
  int loadingPhysicalAddress;
  int priority;
+ int program;
  FILE *programFile;
  PROGRAMS_DATA *executableProgram=programList[indexOfExecutableProgram];
 
@@ -2868,23 +2871,22 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
  PID=OperatingSystem_ObtainAnEntryInTheProcessTable();
 
 
- if (PID == -3) {
+ if (PID == -3)
   return -3;
- }
 
 
  processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);
 
 
- if (processSize == -1) {
+ if (processSize == -1)
   return -1;
- }
- if (processSize == -2) {
+
+ if (processSize == -2)
   return -2;
- }
 
 
  priority=OperatingSystem_ObtainPriority(programFile);
+
 
  if (priority == -2) {
   return -2;
@@ -2894,7 +2896,15 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
   loadingPhysicalAddress=OperatingSystem_ObtainMainMemory(processSize, PID);
 
 
- OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);
+ if (loadingPhysicalAddress == -4)
+  return -4;
+
+
+ program = OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);
+
+
+ if (program == -4)
+  return -4;
 
 
  OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram);

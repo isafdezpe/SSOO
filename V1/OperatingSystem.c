@@ -129,6 +129,8 @@ int OperatingSystem_LongTermScheduler() {
 			ComputerSystem_DebugMessage(104, ERROR, programList[i] -> executableName, "it does not exist");
 		else if (PID == PROGRAMNOTVALID)
 			ComputerSystem_DebugMessage(104, ERROR, programList[i] -> executableName, "invalid priority or size");
+		else if (PID == TOOBIGPROCESS)
+			ComputerSystem_DebugMessage(105, ERROR, programList[i] -> executableName);
 		else {
 			numberOfSuccessfullyCreatedProcesses++;
 			if (programList[i]->type==USERPROGRAM) 
@@ -151,6 +153,7 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	int processSize;
 	int loadingPhysicalAddress;
 	int priority;
+	int program;
 	FILE *programFile;
 	PROGRAMS_DATA *executableProgram=programList[indexOfExecutableProgram];
 
@@ -158,24 +161,23 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	PID=OperatingSystem_ObtainAnEntryInTheProcessTable();
 
 	// Check for free entries at proccess table
-	if (PID == NOFREEENTRY) {
+	if (PID == NOFREEENTRY)
 		return NOFREEENTRY;
-	}
 
 	// Obtain the memory requirements of the program
 	processSize=OperatingSystem_ObtainProgramSize(&programFile, executableProgram->executableName);	
 
-	// Check if the program is valid
-	if (processSize == PROGRAMDOESNOTEXIST) {
+	// Check if the program exists or is valid
+	if (processSize == PROGRAMDOESNOTEXIST) 
 		return PROGRAMDOESNOTEXIST;
-	}
-	if (processSize == PROGRAMNOTVALID) {
+	
+	if (processSize == PROGRAMNOTVALID) 
 		return PROGRAMNOTVALID;
-	}
 	
 	// Obtain the priority for the process
 	priority=OperatingSystem_ObtainPriority(programFile);
 
+	// Check if the priority is valid
 	if (priority == PROGRAMNOTVALID) {
 		return PROGRAMNOTVALID;
 	}
@@ -183,8 +185,16 @@ int OperatingSystem_CreateProcess(int indexOfExecutableProgram) {
 	// Obtain enough memory space
  	loadingPhysicalAddress=OperatingSystem_ObtainMainMemory(processSize, PID);
 
+	// Check if the program size is valid
+	if (loadingPhysicalAddress == TOOBIGPROCESS)
+		return TOOBIGPROCESS;
+
 	// Load program in the allocated memory
-	OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);
+	program = OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize);
+
+	// Check if the number of instructions is valid
+	if (program == TOOBIGPROCESS)
+		return TOOBIGPROCESS;
 	
 	// PCB initialization
 	OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram);
