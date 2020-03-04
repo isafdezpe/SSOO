@@ -165,3 +165,6 @@ void OperatingSystem_ReadyToShutdown(){
 	processTable[sipID].copyOfPCRegister=processTable[sipID].initialPhysicalAddress+processTable[sipID].processSize-1;
 }
 
+void OperatingSystem_TerminatingSIP() {
+	Processor_CopyInSystemStack(MAINMEMORYSIZE-1,OS_address_base+1);
+}

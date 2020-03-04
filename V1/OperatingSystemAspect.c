@@ -519,25 +519,27 @@ extern void funlockfile( FILE *__stream) __attribute__  (( __nothrow__ , __leaf_
 # 840 "/usr/include/stdio.h" 3 4
 # 868 "/usr/include/stdio.h" 3 4
 # 6 "OperatingSystem.h" 2
-# 22 "OperatingSystem.h" 
-# 22 "OperatingSystem.h" 
+# 23 "OperatingSystem.h" 
+# 23 "OperatingSystem.h" 
+enum TypeOfReadyToRunProcessQueues {USERPROCESSQUEUE,DAEMONSQUEUE}; 
+#line 26 "OperatingSystem.h"
 enum ProgramTypes {USERPROGRAM,DAEMONPROGRAM}; 
-#line 25 "OperatingSystem.h"
+#line 29 "OperatingSystem.h"
 enum ProcessStates {NEW,READY,EXECUTING,BLOCKED,EXIT}; 
-#line 28 "OperatingSystem.h"
+#line 32 "OperatingSystem.h"
 enum SystemCallIdentifiers {SYSCALL_END=3,SYSCALL_PRINTEXECPID=5}; 
-#line 40 "OperatingSystem.h"
-typedef struct {int busy; int initialPhysicalAddress; int processSize; int state; int priority; int copyOfPCRegister; unsigned int copyOfPSWRegister; int programListIndex; 
-}PCB; 
-#line 44 "OperatingSystem.h"
-extern  PCB processTable[]; 
 #line 45 "OperatingSystem.h"
-extern int OS_address_base; 
-#line 46 "OperatingSystem.h"
-extern int sipID; 
+typedef struct {int busy; int initialPhysicalAddress; int processSize; int state; int priority; int copyOfPCRegister; unsigned int copyOfPSWRegister; int programListIndex; int queueID; 
+}PCB; 
 #line 49 "OperatingSystem.h"
-void OperatingSystem_Initialize(); 
+extern  PCB processTable[]; 
 #line 50 "OperatingSystem.h"
+extern int OS_address_base; 
+#line 51 "OperatingSystem.h"
+extern int sipID; 
+#line 54 "OperatingSystem.h"
+void OperatingSystem_Initialize(); 
+#line 55 "OperatingSystem.h"
 void OperatingSystem_InterruptLogic(int ); 
 # 2 "OperatingSystem.c" 2
 # 1 "OperatingSystemBase.h" 1
@@ -551,6 +553,8 @@ int OperatingSystem_ObtainPriority( FILE *);
 int OperatingSystem_LoadProgram( FILE *, int , int ); 
 #line 13 "OperatingSystemBase.h"
 void OperatingSystem_ReadyToShutdown(); 
+#line 14 "OperatingSystemBase.h"
+void OperatingSystem_TerminatingSIP(); 
 # 3 "OperatingSystem.c" 2
 # 5 "MMU.h" 1
 void MMU_SetCTRL(int ); 
@@ -834,63 +838,63 @@ extern char *stpncpy(char *__restrict __dest, const char *__restrict __src,  siz
 # 36 "/usr/include/x86_64-linux-gnu/bits/byteswap.h" 2 3 4
 # 46 "/usr/include/x86_64-linux-gnu/bits/byteswap.h" 3 4
 static __inline unsigned int __bswap_32(unsigned int __bsx)  
-# 838 "OperatingSystemAspect.c"
+# 842 "OperatingSystemAspect.c"
 {
-# 840 "OperatingSystemAspect.c"
+# 844 "OperatingSystemAspect.c"
 unsigned int retValue_acc;
 
 
 
 
-# 846 "OperatingSystemAspect.c"
+# 850 "OperatingSystemAspect.c"
 {
 
 #line 47 "/usr/include/x86_64-linux-gnu/bits/byteswap.h"
 
-# 851 "OperatingSystemAspect.c"
+# 855 "OperatingSystemAspect.c"
 retValue_acc = __builtin_bswap32(__bsx);
-# 853 "OperatingSystemAspect.c"
+# 857 "OperatingSystemAspect.c"
 return (unsigned int )retValue_acc;
  
-# 856 "OperatingSystemAspect.c"
+# 860 "OperatingSystemAspect.c"
 
 }
 
-# 860 "OperatingSystemAspect.c"
+# 864 "OperatingSystemAspect.c"
 return (unsigned int )retValue_acc;
 
-# 863 "OperatingSystemAspect.c"
+# 867 "OperatingSystemAspect.c"
 
 }
  
 #line 109 "/usr/include/x86_64-linux-gnu/bits/byteswap.h"
 static __inline  __uint64_t __bswap_64( __uint64_t __bsx)  
-# 869 "OperatingSystemAspect.c"
+# 873 "OperatingSystemAspect.c"
 {
-# 871 "OperatingSystemAspect.c"
+# 875 "OperatingSystemAspect.c"
 __uint64_t retValue_acc;
 
 
 
 
-# 877 "OperatingSystemAspect.c"
+# 881 "OperatingSystemAspect.c"
 {
 
 #line 110 "/usr/include/x86_64-linux-gnu/bits/byteswap.h"
 
-# 882 "OperatingSystemAspect.c"
+# 886 "OperatingSystemAspect.c"
 retValue_acc = __builtin_bswap64(__bsx);
-# 884 "OperatingSystemAspect.c"
+# 888 "OperatingSystemAspect.c"
 return (__uint64_t )retValue_acc;
  
-# 887 "OperatingSystemAspect.c"
+# 891 "OperatingSystemAspect.c"
 
 }
 
-# 891 "OperatingSystemAspect.c"
+# 895 "OperatingSystemAspect.c"
 return (__uint64_t )retValue_acc;
 
-# 894 "OperatingSystemAspect.c"
+# 898 "OperatingSystemAspect.c"
 
 }
  
@@ -899,94 +903,94 @@ return (__uint64_t )retValue_acc;
 # 1 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h" 1 3 4
 # 33 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h" 3 4
 static __inline  __uint16_t __uint16_identity( __uint16_t __x)  
-# 903 "OperatingSystemAspect.c"
+# 907 "OperatingSystemAspect.c"
 {
-# 905 "OperatingSystemAspect.c"
+# 909 "OperatingSystemAspect.c"
 __uint16_t retValue_acc;
 
 
 
 
-# 911 "OperatingSystemAspect.c"
+# 915 "OperatingSystemAspect.c"
 {
 
 #line 34 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h"
 
-# 916 "OperatingSystemAspect.c"
+# 920 "OperatingSystemAspect.c"
 retValue_acc = __x;
-# 918 "OperatingSystemAspect.c"
+# 922 "OperatingSystemAspect.c"
 return (__uint16_t )retValue_acc;
  
-# 921 "OperatingSystemAspect.c"
+# 925 "OperatingSystemAspect.c"
 
 }
 
-# 925 "OperatingSystemAspect.c"
+# 929 "OperatingSystemAspect.c"
 return (__uint16_t )retValue_acc;
 
-# 928 "OperatingSystemAspect.c"
+# 932 "OperatingSystemAspect.c"
 
 }
  
 #line 38 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h"
 static __inline  __uint32_t __uint32_identity( __uint32_t __x)  
-# 934 "OperatingSystemAspect.c"
+# 938 "OperatingSystemAspect.c"
 {
-# 936 "OperatingSystemAspect.c"
+# 940 "OperatingSystemAspect.c"
 __uint32_t retValue_acc;
 
 
 
 
-# 942 "OperatingSystemAspect.c"
+# 946 "OperatingSystemAspect.c"
 {
 
 #line 39 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h"
 
-# 947 "OperatingSystemAspect.c"
+# 951 "OperatingSystemAspect.c"
 retValue_acc = __x;
-# 949 "OperatingSystemAspect.c"
+# 953 "OperatingSystemAspect.c"
 return (__uint32_t )retValue_acc;
  
-# 952 "OperatingSystemAspect.c"
+# 956 "OperatingSystemAspect.c"
 
 }
 
-# 956 "OperatingSystemAspect.c"
+# 960 "OperatingSystemAspect.c"
 return (__uint32_t )retValue_acc;
 
-# 959 "OperatingSystemAspect.c"
+# 963 "OperatingSystemAspect.c"
 
 }
  
 #line 43 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h"
 static __inline  __uint64_t __uint64_identity( __uint64_t __x)  
-# 965 "OperatingSystemAspect.c"
+# 969 "OperatingSystemAspect.c"
 {
-# 967 "OperatingSystemAspect.c"
+# 971 "OperatingSystemAspect.c"
 __uint64_t retValue_acc;
 
 
 
 
-# 973 "OperatingSystemAspect.c"
+# 977 "OperatingSystemAspect.c"
 {
 
 #line 44 "/usr/include/x86_64-linux-gnu/bits/uintn-identity.h"
 
-# 978 "OperatingSystemAspect.c"
+# 982 "OperatingSystemAspect.c"
 retValue_acc = __x;
-# 980 "OperatingSystemAspect.c"
+# 984 "OperatingSystemAspect.c"
 return (__uint64_t )retValue_acc;
  
-# 983 "OperatingSystemAspect.c"
+# 987 "OperatingSystemAspect.c"
 
 }
 
-# 987 "OperatingSystemAspect.c"
+# 991 "OperatingSystemAspect.c"
 return (__uint64_t )retValue_acc;
 
-# 990 "OperatingSystemAspect.c"
+# 994 "OperatingSystemAspect.c"
 
 }
  
@@ -1628,9 +1632,9 @@ extern int timespec_get(struct timespec *__ts, int __base) __attribute__  (( __n
 # 13 "OperatingSystem.c" 
 void OperatingSystem_PrepareDaemons(); 
 #line 14 "OperatingSystem.c"
-void OperatingSystem_PCBInitialization(int , int , int , int , int ); 
+void OperatingSystem_PCBInitialization(int , int , int , int , int , int ); 
 #line 15 "OperatingSystem.c"
-void OperatingSystem_MoveToTheREADYState(int ); 
+void OperatingSystem_MoveToTheREADYState(int , int ); 
 #line 16 "OperatingSystem.c"
 void OperatingSystem_Dispatch(int ); 
 #line 17 "OperatingSystem.c"
@@ -1644,13 +1648,13 @@ int OperatingSystem_LongTermScheduler();
 #line 21 "OperatingSystem.c"
 void OperatingSystem_PreemptRunningProcess(); 
 #line 22 "OperatingSystem.c"
-int OperatingSystem_CreateProcess(int ); 
+int OperatingSystem_CreateProcess(int , int ); 
 #line 23 "OperatingSystem.c"
 int OperatingSystem_ObtainMainMemory(int , int ); 
 #line 24 "OperatingSystem.c"
-int OperatingSystem_ShortTermScheduler(); 
+int OperatingSystem_ShortTermScheduler(int ); 
 #line 25 "OperatingSystem.c"
-int OperatingSystem_ExtractFromReadyToRun(); 
+int OperatingSystem_ExtractFromReadyToRun(int ); 
 #line 26 "OperatingSystem.c"
 void OperatingSystem_HandleException(); 
 #line 27 "OperatingSystem.c"
@@ -1670,672 +1674,692 @@ int initialPID = 4 - 1;
 #line 46 "OperatingSystem.c"
 int baseDaemonsInProgramList; 
 #line 49 "OperatingSystem.c"
- heapItem readyToRunQueue[4]; 
+ heapItem readyToRunQueue[2][4]; 
 #line 50 "OperatingSystem.c"
-int numberOfReadyToRunProcesses = 0; 
-#line 53 "OperatingSystem.c"
+int numberOfReadyToRunProcesses[2] = {0,0}; 
+#line 52 "OperatingSystem.c"
+char *queueNames[2] = {"USER","DAEMONS"}; 
+#line 55 "OperatingSystem.c"
 int numberOfNotTerminatedUserProcesses = 0; 
-#line 56 "OperatingSystem.c"
+#line 58 "OperatingSystem.c"
 char *statesNames[5] = {"NEW","READY","EXECUTING","BLOCKED","EXIT"}; 
-#line 59 "OperatingSystem.c"
+#line 61 "OperatingSystem.c"
 void OperatingSystem_Initialize(int daemonsIndex)  
-# 1683 "OperatingSystemAspect.c"
+# 1689 "OperatingSystemAspect.c"
 {
 
 
 
-# 1688 "OperatingSystemAspect.c"
+# 1694 "OperatingSystemAspect.c"
 {
 
-#line 61 "OperatingSystem.c"
+#line 63 "OperatingSystem.c"
 
-#line 61 "OperatingSystem.c"
+#line 63 "OperatingSystem.c"
 int i,selectedProcess;
-#line 62 "OperatingSystem.c"
+#line 64 "OperatingSystem.c"
 
-#line 62 "OperatingSystem.c"
+#line 64 "OperatingSystem.c"
  FILE *programFile;
-#line 65 "OperatingSystem.c"
+#line 67 "OperatingSystem.c"
 
-#line 65 "OperatingSystem.c"
+#line 67 "OperatingSystem.c"
 int processSize = OperatingSystem_ObtainProgramSize((&programFile), "OperatingSystemCode");
-#line 68 "OperatingSystem.c"
+#line 70 "OperatingSystem.c"
 OperatingSystem_LoadProgram(programFile, OS_address_base, processSize); 
-#line 71 "OperatingSystem.c"
+#line 73 "OperatingSystem.c"
 for(i = 0;i < 4;i++) { { 
-#line 72 "OperatingSystem.c"
+#line 74 "OperatingSystem.c"
 processTable[i].busy = 0; } } 
-#line 75 "OperatingSystem.c"
+#line 77 "OperatingSystem.c"
 Processor_InitializeInterruptVectorTable(OS_address_base + 2); 
-#line 78 "OperatingSystem.c"
+#line 80 "OperatingSystem.c"
 OperatingSystem_PrepareDaemons(daemonsIndex); 
-#line 81 "OperatingSystem.c"
-OperatingSystem_LongTermScheduler(); 
 #line 83 "OperatingSystem.c"
+OperatingSystem_LongTermScheduler(); 
+#line 85 "OperatingSystem.c"
 if (strcmp((programList[processTable[sipID].programListIndex]->executableName), "SystemIdleProcess")){
 { 
-#line 85 "OperatingSystem.c"
+#line 87 "OperatingSystem.c"
 ComputerSystem_DebugMessage(99, 'd', "FATAL ERROR: Missing SIP program!\n"); 
-#line 86 "OperatingSystem.c"
+#line 88 "OperatingSystem.c"
 exit(1); } }
-#line 91 "OperatingSystem.c"
-selectedProcess = OperatingSystem_ShortTermScheduler(); 
-#line 94 "OperatingSystem.c"
+#line 93 "OperatingSystem.c"
+selectedProcess = OperatingSystem_ShortTermScheduler(USERPROCESSQUEUE); 
+#line 95 "OperatingSystem.c"
+if (selectedProcess == (-1)){
+selectedProcess = OperatingSystem_ShortTermScheduler(DAEMONSQUEUE); }
+#line 99 "OperatingSystem.c"
 OperatingSystem_Dispatch(selectedProcess); 
-#line 97 "OperatingSystem.c"
-Processor_SetPC(OS_address_base); 
-# 1728 "OperatingSystemAspect.c"
-
-}
-
-# 1732 "OperatingSystemAspect.c"
-
-}
- 
 #line 102 "OperatingSystem.c"
-void OperatingSystem_PrepareDaemons(int programListDaemonsBase)  
-# 1738 "OperatingSystemAspect.c"
-{
-
-
-
-# 1743 "OperatingSystemAspect.c"
-{
-
-#line 105 "OperatingSystem.c"
-programList[0] = (( PROGRAMS_DATA *)malloc(sizeof ( PROGRAMS_DATA ))); 
-#line 107 "OperatingSystem.c"
-(programList[0]->executableName) = "SystemIdleProcess"; 
-#line 108 "OperatingSystem.c"
-(programList[0]->arrivalTime) = 0; 
-#line 109 "OperatingSystem.c"
-(programList[0]->type) = DAEMONPROGRAM; 
-#line 111 "OperatingSystem.c"
-sipID = initialPID % 4; 
-#line 115 "OperatingSystem.c"
-baseDaemonsInProgramList = programListDaemonsBase; 
-# 1758 "OperatingSystemAspect.c"
+Processor_SetPC(OS_address_base); 
+# 1737 "OperatingSystemAspect.c"
 
 }
 
-# 1762 "OperatingSystemAspect.c"
+# 1741 "OperatingSystemAspect.c"
 
 }
  
-#line 123 "OperatingSystem.c"
-int OperatingSystem_LongTermScheduler()  
-# 1768 "OperatingSystemAspect.c"
+#line 107 "OperatingSystem.c"
+void OperatingSystem_PrepareDaemons(int programListDaemonsBase)  
+# 1747 "OperatingSystemAspect.c"
 {
-# 1770 "OperatingSystemAspect.c"
+
+
+
+# 1752 "OperatingSystemAspect.c"
+{
+
+#line 110 "OperatingSystem.c"
+programList[0] = (( PROGRAMS_DATA *)malloc(sizeof ( PROGRAMS_DATA ))); 
+#line 112 "OperatingSystem.c"
+(programList[0]->executableName) = "SystemIdleProcess"; 
+#line 113 "OperatingSystem.c"
+(programList[0]->arrivalTime) = 0; 
+#line 114 "OperatingSystem.c"
+(programList[0]->type) = DAEMONPROGRAM; 
+#line 116 "OperatingSystem.c"
+sipID = initialPID % 4; 
+#line 120 "OperatingSystem.c"
+baseDaemonsInProgramList = programListDaemonsBase; 
+# 1767 "OperatingSystemAspect.c"
+
+}
+
+# 1771 "OperatingSystemAspect.c"
+
+}
+ 
+#line 128 "OperatingSystem.c"
+int OperatingSystem_LongTermScheduler()  
+# 1777 "OperatingSystemAspect.c"
+{
+# 1779 "OperatingSystemAspect.c"
 int retValue_acc;
 
 
 
 
-# 1776 "OperatingSystemAspect.c"
+# 1785 "OperatingSystemAspect.c"
 {
 
-#line 126 "OperatingSystem.c"
+#line 131 "OperatingSystem.c"
 
-#line 126 "OperatingSystem.c"
+#line 131 "OperatingSystem.c"
 int PID,i,numberOfSuccessfullyCreatedProcesses = 0;
-#line 128 "OperatingSystem.c"
+#line 133 "OperatingSystem.c"
 for(i = 0;programList[i] != (((void *)0)) && i < 20;i++) { { 
-# 128 "OperatingSystem.c" 3 4
-# 129 "OperatingSystem.c" 
-PID = OperatingSystem_CreateProcess(i); 
-#line 130 "OperatingSystem.c"
-if (PID == (-3)){
-ComputerSystem_DebugMessage(103, 'e', (programList[i]->executableName)); }else{
-if (PID == (-1)){
-ComputerSystem_DebugMessage(104, 'e', (programList[i]->executableName), "it does not exist"); }else{
-if (PID == (-2)){
-ComputerSystem_DebugMessage(104, 'e', (programList[i]->executableName), "invalid priority or size"); }else{
-if (PID == (-4)){
-ComputerSystem_DebugMessage(105, 'e', (programList[i]->executableName)); }else{
-{ 
+# 133 "OperatingSystem.c" 3 4
+# 137 "OperatingSystem.c" 
+if ((programList[i]->type) == DAEMONPROGRAM){
+PID = OperatingSystem_CreateProcess(i, DAEMONSQUEUE); }else{
+PID = OperatingSystem_CreateProcess(i, USERPROCESSQUEUE); }
 #line 139 "OperatingSystem.c"
-numberOfSuccessfullyCreatedProcesses++; 
-#line 140 "OperatingSystem.c"
+switch(PID){ { 
+#line 142 "OperatingSystem.c"
+case (-3): ComputerSystem_DebugMessage(103, 'e', (programList[i]->executableName)); 
+#line 143 "OperatingSystem.c"
+break; 
+#line 144 "OperatingSystem.c"
+case (-1): ComputerSystem_DebugMessage(104, 'e', (programList[i]->executableName), "it does not exist"); 
+#line 146 "OperatingSystem.c"
+break; 
+#line 147 "OperatingSystem.c"
+case (-2): ComputerSystem_DebugMessage(104, 'e', (programList[i]->executableName), "invalid priority or size"); 
+#line 149 "OperatingSystem.c"
+break; 
+#line 150 "OperatingSystem.c"
+case (-4): ComputerSystem_DebugMessage(105, 'e', (programList[i]->executableName)); 
+#line 152 "OperatingSystem.c"
+default: numberOfSuccessfullyCreatedProcesses++; 
+#line 154 "OperatingSystem.c"
 if ((programList[i]->type) == USERPROGRAM){
 numberOfNotTerminatedUserProcesses++; }
-#line 143 "OperatingSystem.c"
-OperatingSystem_MoveToTheREADYState(PID); } }}}}} } 
-#line 149 "OperatingSystem.c"
+#line 157 "OperatingSystem.c"
+OperatingSystem_MoveToTheREADYState(PID, processTable[PID].queueID); 
+#line 158 "OperatingSystem.c"
+break; } } } } 
+#line 164 "OperatingSystem.c"
 
-# 1807 "OperatingSystemAspect.c"
+# 1826 "OperatingSystemAspect.c"
 retValue_acc = numberOfSuccessfullyCreatedProcesses;
-# 1809 "OperatingSystemAspect.c"
+# 1828 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  
-# 1812 "OperatingSystemAspect.c"
+# 1831 "OperatingSystemAspect.c"
 
 }
 
-# 1816 "OperatingSystemAspect.c"
+# 1835 "OperatingSystemAspect.c"
 return (int )retValue_acc;
 
-# 1819 "OperatingSystemAspect.c"
+# 1838 "OperatingSystemAspect.c"
 
 }
  
-#line 154 "OperatingSystem.c"
-int OperatingSystem_CreateProcess(int indexOfExecutableProgram)  
-# 1825 "OperatingSystemAspect.c"
+#line 169 "OperatingSystem.c"
+int OperatingSystem_CreateProcess(int indexOfExecutableProgram, int queueId)  
+# 1844 "OperatingSystemAspect.c"
 {
-# 1827 "OperatingSystemAspect.c"
+# 1846 "OperatingSystemAspect.c"
 int retValue_acc;
 
 
 
 
-# 1833 "OperatingSystemAspect.c"
+# 1852 "OperatingSystemAspect.c"
 {
 
-#line 156 "OperatingSystem.c"
+#line 171 "OperatingSystem.c"
 
-#line 156 "OperatingSystem.c"
+#line 171 "OperatingSystem.c"
 int PID;
-#line 157 "OperatingSystem.c"
+#line 172 "OperatingSystem.c"
 
-#line 157 "OperatingSystem.c"
+#line 172 "OperatingSystem.c"
 int processSize;
-#line 158 "OperatingSystem.c"
+#line 173 "OperatingSystem.c"
 
-#line 158 "OperatingSystem.c"
+#line 173 "OperatingSystem.c"
 int loadingPhysicalAddress;
-#line 159 "OperatingSystem.c"
+#line 174 "OperatingSystem.c"
 
-#line 159 "OperatingSystem.c"
+#line 174 "OperatingSystem.c"
 int priority;
-#line 160 "OperatingSystem.c"
+#line 175 "OperatingSystem.c"
 
-#line 160 "OperatingSystem.c"
+#line 175 "OperatingSystem.c"
 int program;
-#line 161 "OperatingSystem.c"
+#line 176 "OperatingSystem.c"
 
-#line 161 "OperatingSystem.c"
+#line 176 "OperatingSystem.c"
  FILE *programFile;
-#line 162 "OperatingSystem.c"
+#line 177 "OperatingSystem.c"
 
-#line 162 "OperatingSystem.c"
+#line 177 "OperatingSystem.c"
  PROGRAMS_DATA *executableProgram = programList[indexOfExecutableProgram];
-#line 165 "OperatingSystem.c"
+#line 180 "OperatingSystem.c"
 PID = OperatingSystem_ObtainAnEntryInTheProcessTable(); 
-#line 168 "OperatingSystem.c"
+#line 183 "OperatingSystem.c"
 if (PID == (-3)){
 
-# 1869 "OperatingSystemAspect.c"
+# 1888 "OperatingSystemAspect.c"
 retValue_acc = (-3);
-# 1871 "OperatingSystemAspect.c"
+# 1890 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  }
-#line 172 "OperatingSystem.c"
+#line 187 "OperatingSystem.c"
 processSize = OperatingSystem_ObtainProgramSize((&programFile), (executableProgram->executableName)); 
-#line 175 "OperatingSystem.c"
+#line 190 "OperatingSystem.c"
 if (processSize == (-1)){
 
-# 1879 "OperatingSystemAspect.c"
+# 1898 "OperatingSystemAspect.c"
 retValue_acc = (-1);
-# 1881 "OperatingSystemAspect.c"
+# 1900 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  }
-#line 178 "OperatingSystem.c"
+#line 193 "OperatingSystem.c"
 if (processSize == (-2)){
 
-# 1887 "OperatingSystemAspect.c"
+# 1906 "OperatingSystemAspect.c"
 retValue_acc = (-2);
-# 1889 "OperatingSystemAspect.c"
-return (int )retValue_acc;
- }
-#line 182 "OperatingSystem.c"
-priority = OperatingSystem_ObtainPriority(programFile); 
-#line 185 "OperatingSystem.c"
-if (priority == (-2)){
-{ 
-#line 186 "OperatingSystem.c"
-
-# 1899 "OperatingSystemAspect.c"
-retValue_acc = (-2);
-# 1901 "OperatingSystemAspect.c"
-return (int )retValue_acc;
- } }
-#line 190 "OperatingSystem.c"
-loadingPhysicalAddress = OperatingSystem_ObtainMainMemory(processSize, PID); 
-#line 193 "OperatingSystem.c"
-if (loadingPhysicalAddress == (-4)){
-
-# 1909 "OperatingSystemAspect.c"
-retValue_acc = (-4);
-# 1911 "OperatingSystemAspect.c"
+# 1908 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  }
 #line 197 "OperatingSystem.c"
-program = OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize); 
+priority = OperatingSystem_ObtainPriority(programFile); 
 #line 200 "OperatingSystem.c"
+if (priority == (-2)){
+{ 
+#line 201 "OperatingSystem.c"
+
+# 1918 "OperatingSystemAspect.c"
+retValue_acc = (-2);
+# 1920 "OperatingSystemAspect.c"
+return (int )retValue_acc;
+ } }
+#line 205 "OperatingSystem.c"
+loadingPhysicalAddress = OperatingSystem_ObtainMainMemory(processSize, PID); 
+#line 208 "OperatingSystem.c"
+if (loadingPhysicalAddress == (-4)){
+
+# 1928 "OperatingSystemAspect.c"
+retValue_acc = (-4);
+# 1930 "OperatingSystemAspect.c"
+return (int )retValue_acc;
+ }
+#line 212 "OperatingSystem.c"
+program = OperatingSystem_LoadProgram(programFile, loadingPhysicalAddress, processSize); 
+#line 215 "OperatingSystem.c"
 if (program == (-4)){
 
-# 1919 "OperatingSystemAspect.c"
+# 1938 "OperatingSystemAspect.c"
 retValue_acc = (-4);
-# 1921 "OperatingSystemAspect.c"
+# 1940 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  }
-#line 204 "OperatingSystem.c"
-OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram); 
-#line 207 "OperatingSystem.c"
+#line 219 "OperatingSystem.c"
+OperatingSystem_PCBInitialization(PID, loadingPhysicalAddress, processSize, priority, indexOfExecutableProgram, queueId); 
+#line 222 "OperatingSystem.c"
 ComputerSystem_DebugMessage(70, 't', PID, (executableProgram->executableName)); 
-#line 209 "OperatingSystem.c"
+#line 224 "OperatingSystem.c"
 
-# 1930 "OperatingSystemAspect.c"
+# 1949 "OperatingSystemAspect.c"
 retValue_acc = PID;
-# 1932 "OperatingSystemAspect.c"
+# 1951 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  
-# 1935 "OperatingSystemAspect.c"
+# 1954 "OperatingSystemAspect.c"
 
 }
 
-# 1939 "OperatingSystemAspect.c"
+# 1958 "OperatingSystemAspect.c"
 return (int )retValue_acc;
 
-# 1942 "OperatingSystemAspect.c"
+# 1961 "OperatingSystemAspect.c"
 
 }
  
-#line 215 "OperatingSystem.c"
+#line 230 "OperatingSystem.c"
 int OperatingSystem_ObtainMainMemory(int processSize, int PID)  
-# 1948 "OperatingSystemAspect.c"
+# 1967 "OperatingSystemAspect.c"
 {
-# 1950 "OperatingSystemAspect.c"
+# 1969 "OperatingSystemAspect.c"
 int retValue_acc;
 
 
 
 
-# 1956 "OperatingSystemAspect.c"
+# 1975 "OperatingSystemAspect.c"
 {
 
-#line 220 "OperatingSystem.c"
+#line 235 "OperatingSystem.c"
 if (processSize > (300 / (4 + 1))){
 
-# 1962 "OperatingSystemAspect.c"
+# 1981 "OperatingSystemAspect.c"
 retValue_acc = (-4);
-# 1964 "OperatingSystemAspect.c"
+# 1983 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  }
-#line 220 "OperatingSystem.c"
-
-# 1969 "OperatingSystemAspect.c"
-retValue_acc = PID * (300 / (4 + 1));
-# 1971 "OperatingSystemAspect.c"
-return (int )retValue_acc;
- 
-# 1974 "OperatingSystemAspect.c"
-
-}
-
-# 1978 "OperatingSystemAspect.c"
-return (int )retValue_acc;
-
-# 1981 "OperatingSystemAspect.c"
-
-}
- 
-#line 225 "OperatingSystem.c"
-void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int processSize, int priority, int processPLIndex)  
-# 1987 "OperatingSystemAspect.c"
-{
-
-
-
-# 1992 "OperatingSystemAspect.c"
-{
-
-#line 227 "OperatingSystem.c"
-processTable[PID].busy = 1; 
-#line 228 "OperatingSystem.c"
-processTable[PID].initialPhysicalAddress = initialPhysicalAddress; 
-#line 229 "OperatingSystem.c"
-processTable[PID].processSize = processSize; 
-#line 230 "OperatingSystem.c"
-processTable[PID].state = NEW; 
-#line 231 "OperatingSystem.c"
-processTable[PID].priority = priority; 
-#line 232 "OperatingSystem.c"
-processTable[PID].programListIndex = processPLIndex; 
-#line 233 "OperatingSystem.c"
-ComputerSystem_DebugMessage(111, 'p', PID, (programList[processTable[PID].programListIndex]->executableName), statesNames[0]); 
 #line 235 "OperatingSystem.c"
+
+# 1988 "OperatingSystemAspect.c"
+retValue_acc = PID * (300 / (4 + 1));
+# 1990 "OperatingSystemAspect.c"
+return (int )retValue_acc;
+ 
+# 1993 "OperatingSystemAspect.c"
+
+}
+
+# 1997 "OperatingSystemAspect.c"
+return (int )retValue_acc;
+
+# 2000 "OperatingSystemAspect.c"
+
+}
+ 
+#line 240 "OperatingSystem.c"
+void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int processSize, int priority, int processPLIndex, int queueId)  
+# 2006 "OperatingSystemAspect.c"
+{
+
+
+
+# 2011 "OperatingSystemAspect.c"
+{
+
+#line 242 "OperatingSystem.c"
+processTable[PID].busy = 1; 
+#line 243 "OperatingSystem.c"
+processTable[PID].initialPhysicalAddress = initialPhysicalAddress; 
+#line 244 "OperatingSystem.c"
+processTable[PID].processSize = processSize; 
+#line 245 "OperatingSystem.c"
+processTable[PID].state = NEW; 
+#line 246 "OperatingSystem.c"
+processTable[PID].priority = priority; 
+#line 247 "OperatingSystem.c"
+processTable[PID].programListIndex = processPLIndex; 
+#line 248 "OperatingSystem.c"
+ComputerSystem_DebugMessage(111, 'p', PID, (programList[processTable[PID].programListIndex]->executableName), statesNames[0]); 
+#line 250 "OperatingSystem.c"
 if ((programList[processPLIndex]->type) == DAEMONPROGRAM){
 { 
-#line 236 "OperatingSystem.c"
+#line 251 "OperatingSystem.c"
 processTable[PID].copyOfPCRegister = initialPhysicalAddress; 
-#line 237 "OperatingSystem.c"
+#line 252 "OperatingSystem.c"
 processTable[PID].copyOfPSWRegister = (((unsigned int )1)) << EXECUTION_MODE_BIT; } }else{
 { 
-#line 240 "OperatingSystem.c"
+#line 255 "OperatingSystem.c"
 processTable[PID].copyOfPCRegister = 0; 
-#line 241 "OperatingSystem.c"
+#line 256 "OperatingSystem.c"
 processTable[PID].copyOfPSWRegister = 0; } }
-# 2021 "OperatingSystemAspect.c"
+#line 258 "OperatingSystem.c"
+processTable[PID].queueID = queueId; 
+# 2042 "OperatingSystemAspect.c"
 
 }
 
-# 2025 "OperatingSystemAspect.c"
+# 2046 "OperatingSystemAspect.c"
 
 }
  
-#line 249 "OperatingSystem.c"
-void OperatingSystem_MoveToTheREADYState(int PID)  
-# 2031 "OperatingSystemAspect.c"
-{
-
-
-
-# 2036 "OperatingSystemAspect.c"
-{
-
-#line 256 "OperatingSystem.c"
-if (Heap_add(PID, readyToRunQueue, 1, (&numberOfReadyToRunProcesses), 4) >= 0){
-{ 
-#line 252 "OperatingSystem.c"
-ComputerSystem_DebugMessage(110, 'p', PID, (programList[processTable[PID].programListIndex]->executableName), statesNames[processTable[PID].state], statesNames[1]); 
-#line 253 "OperatingSystem.c"
-processTable[PID].state = READY; } }
-#line 256 "OperatingSystem.c"
-OperatingSystem_PrintReadyToRunQueue(); 
-# 2048 "OperatingSystemAspect.c"
-
-}
-
+#line 264 "OperatingSystem.c"
+void OperatingSystem_MoveToTheREADYState(int PID, int queueId)  
 # 2052 "OperatingSystemAspect.c"
-
-}
- 
-#line 263 "OperatingSystem.c"
-int OperatingSystem_ShortTermScheduler()  
-# 2058 "OperatingSystemAspect.c"
-{
-# 2060 "OperatingSystemAspect.c"
-int retValue_acc;
-
-
-
-
-# 2066 "OperatingSystemAspect.c"
 {
 
-#line 265 "OperatingSystem.c"
 
-#line 265 "OperatingSystem.c"
-int selectedProcess;
+
+# 2057 "OperatingSystemAspect.c"
+{
+
+#line 271 "OperatingSystem.c"
+if (Heap_add(PID, readyToRunQueue[queueId], 1, (&numberOfReadyToRunProcesses[queueId]), 4) >= 0){
+{ 
 #line 267 "OperatingSystem.c"
-selectedProcess = OperatingSystem_ExtractFromReadyToRun(); 
-#line 269 "OperatingSystem.c"
+ComputerSystem_DebugMessage(110, 'p', PID, (programList[processTable[PID].programListIndex]->executableName), statesNames[processTable[PID].state], statesNames[1]); 
+#line 268 "OperatingSystem.c"
+processTable[PID].state = READY; } }
+#line 271 "OperatingSystem.c"
+OperatingSystem_PrintReadyToRunQueue(); 
+# 2069 "OperatingSystemAspect.c"
 
-# 2077 "OperatingSystemAspect.c"
-retValue_acc = selectedProcess;
+}
+
+# 2073 "OperatingSystemAspect.c"
+
+}
+ 
+#line 278 "OperatingSystem.c"
+int OperatingSystem_ShortTermScheduler(int queueId)  
 # 2079 "OperatingSystemAspect.c"
-return (int )retValue_acc;
- 
-# 2082 "OperatingSystemAspect.c"
-
-}
-
-# 2086 "OperatingSystemAspect.c"
-return (int )retValue_acc;
-
-# 2089 "OperatingSystemAspect.c"
-
-}
- 
-#line 274 "OperatingSystem.c"
-int OperatingSystem_ExtractFromReadyToRun()  
-# 2095 "OperatingSystemAspect.c"
 {
-# 2097 "OperatingSystemAspect.c"
+# 2081 "OperatingSystemAspect.c"
 int retValue_acc;
 
 
 
 
-# 2103 "OperatingSystemAspect.c"
+# 2087 "OperatingSystemAspect.c"
 {
 
-#line 276 "OperatingSystem.c"
+#line 280 "OperatingSystem.c"
 
-#line 276 "OperatingSystem.c"
-int selectedProcess = (-1);
-#line 278 "OperatingSystem.c"
-selectedProcess = Heap_poll(readyToRunQueue, 1, (&numberOfReadyToRunProcesses)); 
-#line 281 "OperatingSystem.c"
+#line 280 "OperatingSystem.c"
+int selectedProcess;
+#line 282 "OperatingSystem.c"
+selectedProcess = OperatingSystem_ExtractFromReadyToRun(queueId); 
+#line 284 "OperatingSystem.c"
 
-# 2114 "OperatingSystemAspect.c"
+# 2098 "OperatingSystemAspect.c"
 retValue_acc = selectedProcess;
-# 2116 "OperatingSystemAspect.c"
+# 2100 "OperatingSystemAspect.c"
 return (int )retValue_acc;
  
-# 2119 "OperatingSystemAspect.c"
+# 2103 "OperatingSystemAspect.c"
 
 }
 
-# 2123 "OperatingSystemAspect.c"
+# 2107 "OperatingSystemAspect.c"
 return (int )retValue_acc;
 
-# 2126 "OperatingSystemAspect.c"
+# 2110 "OperatingSystemAspect.c"
 
 }
  
-#line 286 "OperatingSystem.c"
-void OperatingSystem_Dispatch(int PID)  
-# 2132 "OperatingSystemAspect.c"
-{
-
-
-
-# 2137 "OperatingSystemAspect.c"
-{
-
 #line 289 "OperatingSystem.c"
-executingProcessID = PID; 
+int OperatingSystem_ExtractFromReadyToRun(int queueId)  
+# 2116 "OperatingSystemAspect.c"
+{
+# 2118 "OperatingSystemAspect.c"
+int retValue_acc;
+
+
+
+
+# 2124 "OperatingSystemAspect.c"
+{
+
 #line 291 "OperatingSystem.c"
-processTable[PID].state = EXECUTING; 
-#line 292 "OperatingSystem.c"
-ComputerSystem_DebugMessage(110, 'p', PID, (programList[processTable[PID].programListIndex]->executableName), statesNames[1], statesNames[2]); 
-#line 294 "OperatingSystem.c"
-OperatingSystem_RestoreContext(PID); 
-# 2148 "OperatingSystemAspect.c"
+
+#line 291 "OperatingSystem.c"
+int selectedProcess = (-1);
+#line 293 "OperatingSystem.c"
+selectedProcess = Heap_poll(readyToRunQueue[queueId], 1, (&numberOfReadyToRunProcesses[queueId])); 
+#line 296 "OperatingSystem.c"
+
+# 2135 "OperatingSystemAspect.c"
+retValue_acc = selectedProcess;
+# 2137 "OperatingSystemAspect.c"
+return (int )retValue_acc;
+ 
+# 2140 "OperatingSystemAspect.c"
 
 }
 
-# 2152 "OperatingSystemAspect.c"
+# 2144 "OperatingSystemAspect.c"
+return (int )retValue_acc;
+
+# 2147 "OperatingSystemAspect.c"
 
 }
  
-#line 299 "OperatingSystem.c"
-void OperatingSystem_RestoreContext(int PID)  
+#line 301 "OperatingSystem.c"
+void OperatingSystem_Dispatch(int PID)  
+# 2153 "OperatingSystemAspect.c"
+{
+
+
+
 # 2158 "OperatingSystemAspect.c"
 {
 
-
-
-# 2163 "OperatingSystemAspect.c"
-{
-
-#line 302 "OperatingSystem.c"
-Processor_CopyInSystemStack(300 - 1, processTable[PID].copyOfPCRegister); 
-#line 303 "OperatingSystem.c"
-Processor_CopyInSystemStack(300 - 2, processTable[PID].copyOfPSWRegister); 
+#line 304 "OperatingSystem.c"
+executingProcessID = PID; 
 #line 306 "OperatingSystem.c"
-MMU_SetBase(processTable[PID].initialPhysicalAddress); 
+processTable[PID].state = EXECUTING; 
 #line 307 "OperatingSystem.c"
-MMU_SetLimit(processTable[PID].processSize); 
-# 2174 "OperatingSystemAspect.c"
+ComputerSystem_DebugMessage(110, 'p', PID, (programList[processTable[PID].programListIndex]->executableName), statesNames[1], statesNames[2]); 
+#line 309 "OperatingSystem.c"
+OperatingSystem_RestoreContext(PID); 
+# 2169 "OperatingSystemAspect.c"
 
 }
 
-# 2178 "OperatingSystemAspect.c"
+# 2173 "OperatingSystemAspect.c"
 
 }
  
-#line 312 "OperatingSystem.c"
-void OperatingSystem_PreemptRunningProcess()  
+#line 314 "OperatingSystem.c"
+void OperatingSystem_RestoreContext(int PID)  
+# 2179 "OperatingSystemAspect.c"
+{
+
+
+
 # 2184 "OperatingSystemAspect.c"
 {
 
-
-
-# 2189 "OperatingSystemAspect.c"
-{
-
-#line 315 "OperatingSystem.c"
-OperatingSystem_SaveContext(executingProcessID); 
 #line 317 "OperatingSystem.c"
-OperatingSystem_MoveToTheREADYState(executingProcessID); 
-#line 319 "OperatingSystem.c"
-executingProcessID = (-1); 
-# 2198 "OperatingSystemAspect.c"
+Processor_CopyInSystemStack(300 - 1, processTable[PID].copyOfPCRegister); 
+#line 318 "OperatingSystem.c"
+Processor_CopyInSystemStack(300 - 2, processTable[PID].copyOfPSWRegister); 
+#line 321 "OperatingSystem.c"
+MMU_SetBase(processTable[PID].initialPhysicalAddress); 
+#line 322 "OperatingSystem.c"
+MMU_SetLimit(processTable[PID].processSize); 
+# 2195 "OperatingSystemAspect.c"
 
 }
 
-# 2202 "OperatingSystemAspect.c"
+# 2199 "OperatingSystemAspect.c"
 
 }
  
-#line 324 "OperatingSystem.c"
-void OperatingSystem_SaveContext(int PID)  
-# 2208 "OperatingSystemAspect.c"
-{
-
-
-
-# 2213 "OperatingSystemAspect.c"
-{
-
 #line 327 "OperatingSystem.c"
-processTable[PID].copyOfPCRegister = Processor_CopyFromSystemStack(300 - 1); 
+void OperatingSystem_PreemptRunningProcess()  
+# 2205 "OperatingSystemAspect.c"
+{
+
+
+
+# 2210 "OperatingSystemAspect.c"
+{
+
 #line 330 "OperatingSystem.c"
-processTable[PID].copyOfPSWRegister = Processor_CopyFromSystemStack(300 - 2); 
-# 2220 "OperatingSystemAspect.c"
+OperatingSystem_SaveContext(executingProcessID); 
+#line 332 "OperatingSystem.c"
+OperatingSystem_MoveToTheREADYState(executingProcessID, processTable[executingProcessID].queueID); 
+#line 334 "OperatingSystem.c"
+executingProcessID = (-1); 
+# 2219 "OperatingSystemAspect.c"
 
 }
 
-# 2224 "OperatingSystemAspect.c"
+# 2223 "OperatingSystemAspect.c"
 
 }
  
-#line 336 "OperatingSystem.c"
-void OperatingSystem_HandleException()  
-# 2230 "OperatingSystemAspect.c"
-{
-
-
-
-# 2235 "OperatingSystemAspect.c"
-{
-
 #line 339 "OperatingSystem.c"
-ComputerSystem_DebugMessage(71, 'p', executingProcessID, (programList[processTable[executingProcessID].programListIndex]->executableName)); 
-#line 341 "OperatingSystem.c"
-OperatingSystem_TerminateProcess(); 
-# 2242 "OperatingSystemAspect.c"
+void OperatingSystem_SaveContext(int PID)  
+# 2229 "OperatingSystemAspect.c"
+{
+
+
+
+# 2234 "OperatingSystemAspect.c"
+{
+
+#line 342 "OperatingSystem.c"
+processTable[PID].copyOfPCRegister = Processor_CopyFromSystemStack(300 - 1); 
+#line 345 "OperatingSystem.c"
+processTable[PID].copyOfPSWRegister = Processor_CopyFromSystemStack(300 - 2); 
+# 2241 "OperatingSystemAspect.c"
 
 }
 
-# 2246 "OperatingSystemAspect.c"
+# 2245 "OperatingSystemAspect.c"
 
 }
  
-#line 346 "OperatingSystem.c"
-void OperatingSystem_TerminateProcess()  
-# 2252 "OperatingSystemAspect.c"
-{
-
-
-
-# 2257 "OperatingSystemAspect.c"
-{
-
-#line 348 "OperatingSystem.c"
-
-#line 348 "OperatingSystem.c"
-int selectedProcess;
-#line 350 "OperatingSystem.c"
-processTable[executingProcessID].state = EXIT; 
 #line 351 "OperatingSystem.c"
+void OperatingSystem_HandleException()  
+# 2251 "OperatingSystemAspect.c"
+{
+
+
+
+# 2256 "OperatingSystemAspect.c"
+{
+
+#line 354 "OperatingSystem.c"
+ComputerSystem_DebugMessage(71, 'p', executingProcessID, (programList[processTable[executingProcessID].programListIndex]->executableName)); 
+#line 356 "OperatingSystem.c"
+OperatingSystem_TerminateProcess(); 
+# 2263 "OperatingSystemAspect.c"
+
+}
+
+# 2267 "OperatingSystemAspect.c"
+
+}
+ 
+#line 361 "OperatingSystem.c"
+void OperatingSystem_TerminateProcess()  
+# 2273 "OperatingSystemAspect.c"
+{
+
+
+
+# 2278 "OperatingSystemAspect.c"
+{
+
+#line 363 "OperatingSystem.c"
+
+#line 363 "OperatingSystem.c"
+int selectedProcess;
+#line 365 "OperatingSystem.c"
+processTable[executingProcessID].state = EXIT; 
+#line 366 "OperatingSystem.c"
 ComputerSystem_DebugMessage(110, 'p', executingProcessID, (programList[processTable[executingProcessID].programListIndex]->executableName), statesNames[2], statesNames[4]); 
-#line 353 "OperatingSystem.c"
+#line 368 "OperatingSystem.c"
 if ((programList[processTable[executingProcessID].programListIndex]->type) == USERPROGRAM){
 numberOfNotTerminatedUserProcesses--; }
-#line 357 "OperatingSystem.c"
+#line 372 "OperatingSystem.c"
 if (numberOfNotTerminatedUserProcesses == 0){
 { 
-#line 365 "OperatingSystem.c"
+#line 380 "OperatingSystem.c"
 if (executingProcessID == sipID){
 { 
-#line 360 "OperatingSystem.c"
-Processor_CopyInSystemStack(300 - 1, OS_address_base + 1); 
-#line 361 "OperatingSystem.c"
+#line 375 "OperatingSystem.c"
+OperatingSystem_TerminatingSIP(); 
+#line 376 "OperatingSystem.c"
 ComputerSystem_DebugMessage(99, 'd', "The system will shut down now...\n"); 
-#line 362 "OperatingSystem.c"
+#line 377 "OperatingSystem.c"
 return ; 
  } }
-#line 365 "OperatingSystem.c"
+#line 380 "OperatingSystem.c"
 OperatingSystem_ReadyToShutdown(); } }
-#line 368 "OperatingSystem.c"
-selectedProcess = OperatingSystem_ShortTermScheduler(); 
-#line 371 "OperatingSystem.c"
+#line 383 "OperatingSystem.c"
+selectedProcess = OperatingSystem_ShortTermScheduler(USERPROCESSQUEUE); 
+#line 385 "OperatingSystem.c"
+if (selectedProcess == (-1)){
+selectedProcess = OperatingSystem_ShortTermScheduler(DAEMONSQUEUE); }
+#line 389 "OperatingSystem.c"
 OperatingSystem_Dispatch(selectedProcess); 
-# 2290 "OperatingSystemAspect.c"
+# 2314 "OperatingSystemAspect.c"
 
 }
 
-# 2294 "OperatingSystemAspect.c"
+# 2318 "OperatingSystemAspect.c"
 
 }
  
-#line 375 "OperatingSystem.c"
+#line 393 "OperatingSystem.c"
 void OperatingSystem_HandleSystemCall()  
-# 2300 "OperatingSystemAspect.c"
+# 2324 "OperatingSystemAspect.c"
 {
 
 
 
-# 2305 "OperatingSystemAspect.c"
+# 2329 "OperatingSystemAspect.c"
 {
 
-#line 377 "OperatingSystem.c"
+#line 395 "OperatingSystem.c"
 
-#line 377 "OperatingSystem.c"
+#line 395 "OperatingSystem.c"
 int systemCallID;
-#line 380 "OperatingSystem.c"
+#line 398 "OperatingSystem.c"
 systemCallID = Processor_GetRegisterA(); 
-#line 382 "OperatingSystem.c"
+#line 400 "OperatingSystem.c"
 switch(systemCallID){ { 
-#line 385 "OperatingSystem.c"
+#line 403 "OperatingSystem.c"
 case SYSCALL_PRINTEXECPID: ComputerSystem_DebugMessage(72, 'p', executingProcessID, (programList[processTable[executingProcessID].programListIndex]->executableName)); 
-#line 386 "OperatingSystem.c"
+#line 404 "OperatingSystem.c"
 break; 
-#line 388 "OperatingSystem.c"
+#line 406 "OperatingSystem.c"
 case SYSCALL_END: ComputerSystem_DebugMessage(73, 'p', executingProcessID, (programList[processTable[executingProcessID].programListIndex]->executableName)); 
-#line 391 "OperatingSystem.c"
+#line 409 "OperatingSystem.c"
 OperatingSystem_TerminateProcess(); 
-#line 392 "OperatingSystem.c"
+#line 410 "OperatingSystem.c"
 break; } } 
-# 2326 "OperatingSystemAspect.c"
+# 2350 "OperatingSystemAspect.c"
 
 }
 
-# 2330 "OperatingSystemAspect.c"
+# 2354 "OperatingSystemAspect.c"
 
 }
  
   void __utac_acc__Aspect__3 (void);
 
 
-#line 397 "OperatingSystem.c"
+#line 415 "OperatingSystem.c"
 void OperatingSystem_InterruptLogic(int entryPoint)  
-# 2339 "OperatingSystemAspect.c"
+# 2363 "OperatingSystemAspect.c"
 {
 
 
@@ -2345,60 +2369,72 @@ __utac_acc__Aspect__3();
 
 }
 
-# 2349 "OperatingSystemAspect.c"
+# 2373 "OperatingSystemAspect.c"
 {
 
-#line 405 "OperatingSystem.c"
+#line 423 "OperatingSystem.c"
 switch(entryPoint){ { 
-#line 400 "OperatingSystem.c"
+#line 418 "OperatingSystem.c"
 case SYSCALL_BIT: OperatingSystem_HandleSystemCall(); 
-#line 401 "OperatingSystem.c"
+#line 419 "OperatingSystem.c"
 break; 
-#line 402 "OperatingSystem.c"
+#line 420 "OperatingSystem.c"
 case EXCEPTION_BIT: OperatingSystem_HandleException(); 
-#line 404 "OperatingSystem.c"
+#line 422 "OperatingSystem.c"
 break; } } 
-# 2362 "OperatingSystemAspect.c"
+# 2386 "OperatingSystemAspect.c"
 
 }
 
-# 2366 "OperatingSystemAspect.c"
+# 2390 "OperatingSystemAspect.c"
 
 }
  
-#line 409 "OperatingSystem.c"
+#line 427 "OperatingSystem.c"
 void OperatingSystem_PrintReadyToRunQueue()  
-# 2372 "OperatingSystemAspect.c"
+# 2396 "OperatingSystemAspect.c"
 {
 
 
 
-# 2377 "OperatingSystemAspect.c"
+# 2401 "OperatingSystemAspect.c"
 {
 
-#line 410 "OperatingSystem.c"
+#line 428 "OperatingSystem.c"
 
-#line 410 "OperatingSystem.c"
+#line 428 "OperatingSystem.c"
 int i;
-#line 411 "OperatingSystem.c"
-
-#line 411 "OperatingSystem.c"
-int processPID;
-#line 413 "OperatingSystem.c"
+#line 430 "OperatingSystem.c"
 ComputerSystem_DebugMessage(106, 's'); 
-#line 414 "OperatingSystem.c"
-for(i = 0;i < numberOfReadyToRunProcesses;i++) { { 
-#line 415 "OperatingSystem.c"
-processPID = readyToRunQueue[i].info; 
-#line 416 "OperatingSystem.c"
-if (i == numberOfReadyToRunProcesses - 1){
-ComputerSystem_DebugMessage(107, 's', processPID, processTable[processPID].priority, "\n"); }else{
-ComputerSystem_DebugMessage(107, 's', processPID, processTable[processPID].priority, " "); }} } 
-# 2398 "OperatingSystemAspect.c"
+#line 432 "OperatingSystem.c"
+ComputerSystem_DebugMessage(112, 's'); 
+#line 433 "OperatingSystem.c"
+if (numberOfReadyToRunProcesses[USERPROCESSQUEUE] == 0){
+ComputerSystem_DebugMessage(114, 's'); }else{
+{ 
+#line 444 "OperatingSystem.c"
+for(i = 0;i < numberOfReadyToRunProcesses[USERPROCESSQUEUE];i++) { { 
+#line 443 "OperatingSystem.c"
+if (i == numberOfReadyToRunProcesses[DAEMONSQUEUE] - 1){
+ComputerSystem_DebugMessage(107, 's', readyToRunQueue[USERPROCESSQUEUE][i], processTable[readyToRunQueue[USERPROCESSQUEUE][i].info].priority, "\n"); }else{
+ComputerSystem_DebugMessage(107, 's', readyToRunQueue[USERPROCESSQUEUE][i], processTable[readyToRunQueue[USERPROCESSQUEUE][i].info].priority, ", "); }} } } }
+#line 447 "OperatingSystem.c"
+ComputerSystem_DebugMessage(113, 's'); 
+#line 448 "OperatingSystem.c"
+if (numberOfReadyToRunProcesses[DAEMONSQUEUE] == 0){
+ComputerSystem_DebugMessage(114, 's'); }else{
+{ 
+#line 459 "OperatingSystem.c"
+for(i = 0;i < numberOfReadyToRunProcesses[DAEMONSQUEUE];i++) { { 
+#line 458 "OperatingSystem.c"
+if (i == numberOfReadyToRunProcesses[DAEMONSQUEUE] - 1){
+ComputerSystem_DebugMessage(107, 's', readyToRunQueue[DAEMONSQUEUE][i], processTable[readyToRunQueue[DAEMONSQUEUE][i].info].priority, "\n"); }else{
+ComputerSystem_DebugMessage(107, 's', readyToRunQueue[DAEMONSQUEUE][i], processTable[readyToRunQueue[DAEMONSQUEUE][i].info].priority, ", "); }} } } }
+# 2434 "OperatingSystemAspect.c"
 
 }
 
-# 2402 "OperatingSystemAspect.c"
+# 2438 "OperatingSystemAspect.c"
 
 }
  

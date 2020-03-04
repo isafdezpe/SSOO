@@ -11,5 +11,6 @@ int OperatingSystem_ObtainProgramSize(FILE **, char *);
 int OperatingSystem_ObtainPriority(FILE *);
 int OperatingSystem_LoadProgram(FILE *, int, int);
 void OperatingSystem_ReadyToShutdown();
+void OperatingSystem_TerminatingSIP();
 
 #endif

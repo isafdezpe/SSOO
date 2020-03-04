@@ -153,11 +153,13 @@ extern char defaultDebugLevel[];
 void ComputerSystem_PowerOn(int argc, char *argv[], int ); 
 #line 9 "ComputerSystem.h"
 void ComputerSystem_PowerOff(); 
+#line 10 "ComputerSystem.h"
+void ComputerSystem_PrintProgramList(); 
 # 6 "ComputerSystem.h" 2
-# 37 "ComputerSystem.h" 
+# 38 "ComputerSystem.h" 
 typedef struct ProgramData {char *executableName; unsigned int arrivalTime; unsigned int type; 
 }PROGRAMS_DATA; 
-#line 41 "ComputerSystem.h"
+#line 42 "ComputerSystem.h"
 extern  PROGRAMS_DATA *programList[20]; 
 # 5 "OperatingSystem.h" 2
 # 1 "/usr/include/stdio.h" 1 3 4
@@ -620,25 +622,27 @@ extern void funlockfile( FILE *__stream) __attribute__  (( __nothrow__ , __leaf_
 # 840 "/usr/include/stdio.h" 3 4
 # 868 "/usr/include/stdio.h" 3 4
 # 6 "OperatingSystem.h" 2
-# 22 "OperatingSystem.h" 
-# 22 "OperatingSystem.h" 
+# 23 "OperatingSystem.h" 
+# 23 "OperatingSystem.h" 
+enum TypeOfReadyToRunProcessQueues {USERPROCESSQUEUE,DAEMONSQUEUE}; 
+#line 26 "OperatingSystem.h"
 enum ProgramTypes {USERPROGRAM,DAEMONPROGRAM}; 
-#line 25 "OperatingSystem.h"
+#line 29 "OperatingSystem.h"
 enum ProcessStates {NEW,READY,EXECUTING,BLOCKED,EXIT}; 
-#line 28 "OperatingSystem.h"
+#line 32 "OperatingSystem.h"
 enum SystemCallIdentifiers {SYSCALL_END=3,SYSCALL_PRINTEXECPID=5}; 
-#line 40 "OperatingSystem.h"
-typedef struct {int busy; int initialPhysicalAddress; int processSize; int state; int priority; int copyOfPCRegister; unsigned int copyOfPSWRegister; int programListIndex; 
-}PCB; 
-#line 44 "OperatingSystem.h"
-extern  PCB processTable[]; 
 #line 45 "OperatingSystem.h"
-extern int OS_address_base; 
-#line 46 "OperatingSystem.h"
-extern int sipID; 
+typedef struct {int busy; int initialPhysicalAddress; int processSize; int state; int priority; int copyOfPCRegister; unsigned int copyOfPSWRegister; int programListIndex; int queueID; 
+}PCB; 
 #line 49 "OperatingSystem.h"
-void OperatingSystem_Initialize(); 
+extern  PCB processTable[]; 
 #line 50 "OperatingSystem.h"
+extern int OS_address_base; 
+#line 51 "OperatingSystem.h"
+extern int sipID; 
+#line 54 "OperatingSystem.h"
+void OperatingSystem_Initialize(); 
+#line 55 "OperatingSystem.h"
 void OperatingSystem_InterruptLogic(int ); 
 # 4 "Processor.c" 2
 # 1 "/usr/include/string.h" 1 3 4
@@ -805,12 +809,12 @@ int interruptVectorTable[10];
 char pswmask[] = "----------------"; 
 #line 37 "Processor.c"
 void Processor_InitializeInterruptVectorTable(int interruptVectorInitialAddress)  
-# 809 "ProcessorAspect.c"
+# 813 "ProcessorAspect.c"
 {
 
 
 
-# 814 "ProcessorAspect.c"
+# 818 "ProcessorAspect.c"
 {
 
 #line 38 "Processor.c"
@@ -823,11 +827,11 @@ for(i = 0;i < 10;i++) { interruptVectorTable[i] = interruptVectorInitialAddress 
 interruptVectorTable[SYSCALL_BIT] = interruptVectorInitialAddress; 
 #line 43 "Processor.c"
 interruptVectorTable[EXCEPTION_BIT] = interruptVectorInitialAddress + 2; 
-# 827 "ProcessorAspect.c"
+# 831 "ProcessorAspect.c"
 
 }
 
-# 831 "ProcessorAspect.c"
+# 835 "ProcessorAspect.c"
 
 }
  
@@ -836,12 +840,12 @@ interruptVectorTable[EXCEPTION_BIT] = interruptVectorInitialAddress + 2;
 
 #line 50 "Processor.c"
 void Processor_InstructionCycleLoop()  
-# 840 "ProcessorAspect.c"
+# 844 "ProcessorAspect.c"
 {
 
 
 
-# 845 "ProcessorAspect.c"
+# 849 "ProcessorAspect.c"
 {
 
 #line 59 "Processor.c"
@@ -856,7 +860,7 @@ if (interruptLines_CPU){
 { 
 #line 57 "Processor.c"
 Processor_ManageInterrupts(); } }} } 
-# 860 "ProcessorAspect.c"
+# 864 "ProcessorAspect.c"
 
 }
 
@@ -865,7 +869,7 @@ __utac_acc__Aspect__4();
 
 }
 
-# 869 "ProcessorAspect.c"
+# 873 "ProcessorAspect.c"
 
 }
  
@@ -874,9 +878,9 @@ __utac_acc__Aspect__4();
 
 #line 63 "Processor.c"
 int Processor_FetchInstruction()  
-# 878 "ProcessorAspect.c"
+# 882 "ProcessorAspect.c"
 {
-# 880 "ProcessorAspect.c"
+# 884 "ProcessorAspect.c"
 int retValue_acc;
 
 
@@ -887,7 +891,7 @@ __utac_acc__Aspect__1();
 
 }
 
-# 891 "ProcessorAspect.c"
+# 895 "ProcessorAspect.c"
 {
 
 #line 66 "Processor.c"
@@ -916,26 +920,26 @@ ComputerSystem_DebugMessage(68, 'h', codedInstruction); } }else{
 ComputerSystem_DebugMessage(100, 'h', "_ _ _\n"); 
 #line 86 "Processor.c"
 
-# 920 "ProcessorAspect.c"
+# 924 "ProcessorAspect.c"
 retValue_acc = 0;
-# 922 "ProcessorAspect.c"
+# 926 "ProcessorAspect.c"
 return (int )retValue_acc;
  } }
 #line 88 "Processor.c"
 
-# 927 "ProcessorAspect.c"
+# 931 "ProcessorAspect.c"
 retValue_acc = 1;
-# 929 "ProcessorAspect.c"
+# 933 "ProcessorAspect.c"
 return (int )retValue_acc;
  
-# 932 "ProcessorAspect.c"
+# 936 "ProcessorAspect.c"
 
 }
 
-# 936 "ProcessorAspect.c"
+# 940 "ProcessorAspect.c"
 return (int )retValue_acc;
 
-# 939 "ProcessorAspect.c"
+# 943 "ProcessorAspect.c"
 
 }
  
@@ -947,12 +951,12 @@ return (int )retValue_acc;
 
 #line 93 "Processor.c"
 void Processor_DecodeAndExecuteInstruction()  
-# 951 "ProcessorAspect.c"
+# 955 "ProcessorAspect.c"
 {
 
 
 
-# 956 "ProcessorAspect.c"
+# 960 "ProcessorAspect.c"
 {
 
 #line 94 "Processor.c"
@@ -1118,7 +1122,7 @@ break; } }
 Processor_UpdatePSW(); 
 #line 245 "Processor.c"
 ComputerSystem_DebugMessage(69, 'h', InstructionNames[operationCode], operand1, operand2, registerPC_CPU, registerAccumulator_CPU, registerPSW_CPU, Processor_ShowPSW()); 
-# 1122 "ProcessorAspect.c"
+# 1126 "ProcessorAspect.c"
 
 }
 
@@ -1127,18 +1131,18 @@ __utac_acc__Aspect__2();
 
 }
 
-# 1131 "ProcessorAspect.c"
+# 1135 "ProcessorAspect.c"
 
 }
  
 #line 250 "Processor.c"
 void Processor_ManageInterrupts()  
-# 1137 "ProcessorAspect.c"
+# 1141 "ProcessorAspect.c"
 {
 
 
 
-# 1142 "ProcessorAspect.c"
+# 1146 "ProcessorAspect.c"
 {
 
 #line 252 "Processor.c"
@@ -1160,25 +1164,25 @@ Processor_ActivatePSW_Bit(EXECUTION_MODE_BIT);
 registerPC_CPU = interruptVectorTable[i]; 
 #line 266 "Processor.c"
 break; } }} 
-# 1164 "ProcessorAspect.c"
+# 1168 "ProcessorAspect.c"
 
 }
 
-# 1168 "ProcessorAspect.c"
+# 1172 "ProcessorAspect.c"
 
 }
  
 #line 270 "Processor.c"
 char *Processor_ShowPSW()  
-# 1174 "ProcessorAspect.c"
+# 1178 "ProcessorAspect.c"
 {
-# 1176 "ProcessorAspect.c"
+# 1180 "ProcessorAspect.c"
 char* retValue_acc;
 
 
 
 
-# 1182 "ProcessorAspect.c"
+# 1186 "ProcessorAspect.c"
 {
 
 #line 271 "Processor.c"
@@ -1204,19 +1208,19 @@ if (Processor_PSW_BitState(POWEROFF_BIT)){
 pswmask[tam - POWEROFF_BIT] = 'S'; }
 #line 283 "Processor.c"
 
-# 1208 "ProcessorAspect.c"
+# 1212 "ProcessorAspect.c"
 retValue_acc = pswmask;
-# 1210 "ProcessorAspect.c"
+# 1214 "ProcessorAspect.c"
 return (char* )retValue_acc;
  
-# 1213 "ProcessorAspect.c"
+# 1217 "ProcessorAspect.c"
 
 }
 
-# 1217 "ProcessorAspect.c"
+# 1221 "ProcessorAspect.c"
 return (char* )retValue_acc;
 
-# 1220 "ProcessorAspect.c"
+# 1224 "ProcessorAspect.c"
 
 }
  

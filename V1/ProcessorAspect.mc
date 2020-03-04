@@ -171,7 +171,8 @@ extern char defaultDebugLevel[];
 
 void ComputerSystem_PowerOn(int argc, char *argv[], int);
 void ComputerSystem_PowerOff();
-# 33 "ComputerSystem.h"
+void ComputerSystem_PrintProgramList();
+# 34 "ComputerSystem.h"
 typedef struct ProgramData {
     char *executableName;
     unsigned int arrivalTime;
@@ -967,9 +968,12 @@ extern void funlockfile (FILE *__stream) __attribute__ ((__nothrow__ , __leaf__)
 # 868 "/usr/include/stdio.h" 3 4
 
 # 6 "OperatingSystem.h" 2
-# 22 "OperatingSystem.h"
+# 23 "OperatingSystem.h"
 
-# 22 "OperatingSystem.h"
+# 23 "OperatingSystem.h"
+enum TypeOfReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE};
+
+
 enum ProgramTypes { USERPROGRAM, DAEMONPROGRAM };
 
 
@@ -988,6 +992,7 @@ typedef struct {
  int copyOfPCRegister;
  unsigned int copyOfPSWRegister;
  int programListIndex;
+ int queueID;
 } PCB;
 
 

@@ -158,7 +158,7 @@ int Processor_GetCTRL() {
 
 // Setter for the registerCTRL_CPU
 void Processor_SetCTRL(int ctrl) {
-  	registerCTRL_CPU |= (ctrl & 0xff);
+  	registerCTRL_CPU = (ctrl & 0xff);
 }
 
 // Setter for the Accumulator
