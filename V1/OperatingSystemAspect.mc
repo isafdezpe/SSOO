@@ -842,7 +842,7 @@ enum ProgramTypes { USERPROGRAM, DAEMONPROGRAM };
 enum ProcessStates { NEW, READY, EXECUTING, BLOCKED, EXIT};
 
 
-enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_PRINTEXECPID=5};
+enum SystemCallIdentifiers { SYSCALL_END=3, SYSCALL_YIELD=4,SYSCALL_PRINTEXECPID=5};
 
 
 typedef struct {
@@ -2723,7 +2723,7 @@ extern int timespec_get (struct timespec *__ts, int __base)
 # 13 "OperatingSystem.c"
 void OperatingSystem_PrepareDaemons();
 void OperatingSystem_PCBInitialization(int, int, int, int, int, int);
-void OperatingSystem_MoveToTheREADYState(int, int);
+void OperatingSystem_MoveToTheREADYState(int);
 void OperatingSystem_Dispatch(int);
 void OperatingSystem_RestoreContext(int);
 void OperatingSystem_SaveContext(int);
@@ -2732,7 +2732,7 @@ int OperatingSystem_LongTermScheduler();
 void OperatingSystem_PreemptRunningProcess();
 int OperatingSystem_CreateProcess(int, int);
 int OperatingSystem_ObtainMainMemory(int, int);
-int OperatingSystem_ShortTermScheduler(int);
+int OperatingSystem_ShortTermScheduler();
 int OperatingSystem_ExtractFromReadyToRun(int);
 void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
@@ -2801,10 +2801,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 
 
 
- selectedProcess=OperatingSystem_ShortTermScheduler(USERPROCESSQUEUE);
-
- if (selectedProcess == -1)
-  selectedProcess=OperatingSystem_ShortTermScheduler(DAEMONSQUEUE);
+ selectedProcess=OperatingSystem_ShortTermScheduler();
 
 
  OperatingSystem_Dispatch(selectedProcess);
@@ -2842,9 +2839,9 @@ int OperatingSystem_LongTermScheduler() {
   numberOfSuccessfullyCreatedProcesses=0;
 
  for (i=0; programList[i]!=
-# 133 "OperatingSystem.c" 3 4
+# 130 "OperatingSystem.c" 3 4
                           ((void *)0) 
-# 133 "OperatingSystem.c"
+# 130 "OperatingSystem.c"
                                && i<20 ; i++) {
   if (programList[i]->type == DAEMONPROGRAM)
    PID=OperatingSystem_CreateProcess(i, DAEMONSQUEUE);
@@ -2869,7 +2866,7 @@ int OperatingSystem_LongTermScheduler() {
    if (programList[i]->type==USERPROGRAM)
     numberOfNotTerminatedUserProcesses++;
 
-   OperatingSystem_MoveToTheREADYState(PID, processTable[PID].queueID);
+   OperatingSystem_MoveToTheREADYState(PID);
    break;
   }
 
@@ -2976,9 +2973,9 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 
 
 
-void OperatingSystem_MoveToTheREADYState(int PID, int queueId) {
+void OperatingSystem_MoveToTheREADYState(int PID) {
 
- if (Heap_add(PID, readyToRunQueue[queueId],1 ,&numberOfReadyToRunProcesses[queueId] ,4)>=0) {
+ if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],1 ,&numberOfReadyToRunProcesses[processTable[PID].queueID] ,4)>=0) {
   ComputerSystem_DebugMessage(110, 'p', PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[processTable[PID].state], statesNames[1]);
   processTable[PID].state=READY;
  }
@@ -2990,11 +2987,14 @@ void OperatingSystem_MoveToTheREADYState(int PID, int queueId) {
 
 
 
-int OperatingSystem_ShortTermScheduler(int queueId) {
+int OperatingSystem_ShortTermScheduler() {
 
  int selectedProcess;
 
- selectedProcess=OperatingSystem_ExtractFromReadyToRun(queueId);
+ selectedProcess=OperatingSystem_ExtractFromReadyToRun(USERPROCESSQUEUE);
+
+ if (selectedProcess == -1)
+  selectedProcess = OperatingSystem_ExtractFromReadyToRun(DAEMONSQUEUE);
 
  return selectedProcess;
 }
@@ -3044,7 +3044,7 @@ void OperatingSystem_PreemptRunningProcess() {
 
  OperatingSystem_SaveContext(executingProcessID);
 
- OperatingSystem_MoveToTheREADYState(executingProcessID, processTable[executingProcessID].queueID);
+ OperatingSystem_MoveToTheREADYState(executingProcessID);
 
  executingProcessID=-1;
 }
@@ -3108,6 +3108,8 @@ void OperatingSystem_TerminateProcess() {
 void OperatingSystem_HandleSystemCall() {
 
  int systemCallID;
+ int oldPID;
+ int PID;
 
 
  systemCallID=Processor_GetRegisterA();
@@ -3122,6 +3124,20 @@ void OperatingSystem_HandleSystemCall() {
 
    ComputerSystem_DebugMessage(73,'p',executingProcessID,programList[processTable[executingProcessID].programListIndex]->executableName);
    OperatingSystem_TerminateProcess();
+   break;
+
+  case SYSCALL_YIELD:
+   oldPID = executingProcessID;
+   PID = OperatingSystem_ShortTermScheduler();
+
+   if (processTable[oldPID].priority == processTable[PID].priority) {
+    ComputerSystem_DebugMessage(115, 's', oldPID, programList[processTable[oldPID].programListIndex]->executableName,
+     PID, programList[processTable[PID].programListIndex]->executableName);
+    OperatingSystem_PreemptRunningProcess();
+
+    OperatingSystem_Dispatch(PID);
+   }
+
    break;
  }
 }

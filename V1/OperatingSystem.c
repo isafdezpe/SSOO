@@ -12,7 +12,7 @@
 // Functions prototypes
 void OperatingSystem_PrepareDaemons();
 void OperatingSystem_PCBInitialization(int, int, int, int, int, int);
-void OperatingSystem_MoveToTheREADYState(int, int);
+void OperatingSystem_MoveToTheREADYState(int);
 void OperatingSystem_Dispatch(int);
 void OperatingSystem_RestoreContext(int);
 void OperatingSystem_SaveContext(int);
@@ -21,7 +21,7 @@ int OperatingSystem_LongTermScheduler();
 void OperatingSystem_PreemptRunningProcess();
 int OperatingSystem_CreateProcess(int, int);
 int OperatingSystem_ObtainMainMemory(int, int);
-int OperatingSystem_ShortTermScheduler(int);
+int OperatingSystem_ShortTermScheduler();
 int OperatingSystem_ExtractFromReadyToRun(int);
 void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
@@ -90,10 +90,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 
 	// At least, one user process has been created
 	// Select the first process that is going to use the processor
-	selectedProcess=OperatingSystem_ShortTermScheduler(USERPROCESSQUEUE);
-
-	if (selectedProcess == NOPROCESS)
-		selectedProcess=OperatingSystem_ShortTermScheduler(DAEMONSQUEUE);
+	selectedProcess=OperatingSystem_ShortTermScheduler();
 
 	// Assign the processor to the selected process
 	OperatingSystem_Dispatch(selectedProcess);
@@ -154,7 +151,7 @@ int OperatingSystem_LongTermScheduler() {
 			if (programList[i]->type==USERPROGRAM) 
 				numberOfNotTerminatedUserProcesses++;
 			// Move process to the ready state
-			OperatingSystem_MoveToTheREADYState(PID, processTable[PID].queueID);
+			OperatingSystem_MoveToTheREADYState(PID);
 			break;
 		}
 		
@@ -261,9 +258,9 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
-void OperatingSystem_MoveToTheREADYState(int PID, int queueId) {
+void OperatingSystem_MoveToTheREADYState(int PID) {
 	
-	if (Heap_add(PID, readyToRunQueue[queueId],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses[queueId] ,PROCESSTABLEMAXSIZE)>=0) {
+	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses[processTable[PID].queueID] ,PROCESSTABLEMAXSIZE)>=0) {
 		ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[processTable[PID].state], statesNames[1]);
 		processTable[PID].state=READY;
 	} 
@@ -275,12 +272,15 @@ void OperatingSystem_MoveToTheREADYState(int PID, int queueId) {
 // The STS is responsible of deciding which process to execute when specific events occur.
 // It uses processes priorities to make the decission. Given that the READY queue is ordered
 // depending on processes priority, the STS just selects the process in front of the READY queue
-int OperatingSystem_ShortTermScheduler(int queueId) {
+int OperatingSystem_ShortTermScheduler() {
 	
 	int selectedProcess;
 
-	selectedProcess=OperatingSystem_ExtractFromReadyToRun(queueId);
-	
+	selectedProcess=OperatingSystem_ExtractFromReadyToRun(USERPROCESSQUEUE);
+
+	if (selectedProcess == NOPROCESS)
+		selectedProcess = OperatingSystem_ExtractFromReadyToRun(DAEMONSQUEUE);
+
 	return selectedProcess;
 }
 
@@ -329,7 +329,7 @@ void OperatingSystem_PreemptRunningProcess() {
 	// Save in the process' PCB essential values stored in hardware registers and the system stack
 	OperatingSystem_SaveContext(executingProcessID);
 	// Change the process' state
-	OperatingSystem_MoveToTheREADYState(executingProcessID, processTable[executingProcessID].queueID);
+	OperatingSystem_MoveToTheREADYState(executingProcessID);
 	// The processor is not assigned until the OS selects another process
 	executingProcessID=NOPROCESS;
 }
@@ -393,6 +393,8 @@ void OperatingSystem_TerminateProcess() {
 void OperatingSystem_HandleSystemCall() {
   
 	int systemCallID;
+	int oldPID;
+	int PID;
 
 	// Register A contains the identifier of the issued system call
 	systemCallID=Processor_GetRegisterA();
@@ -407,6 +409,19 @@ void OperatingSystem_HandleSystemCall() {
 			// Show message: "Process [executingProcessID] has requested to terminate\n"
 			ComputerSystem_DebugMessage(73,SYSPROC,executingProcessID,programList[processTable[executingProcessID].programListIndex]->executableName);
 			OperatingSystem_TerminateProcess();
+			break;
+
+		case SYSCALL_YIELD:
+			oldPID = executingProcessID;
+			PID = OperatingSystem_ShortTermScheduler();
+
+			if (processTable[oldPID].priority == processTable[PID].priority) {
+				ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
+					PID, programList[processTable[PID].programListIndex]->executableName);
+				OperatingSystem_PreemptRunningProcess();
+				OperatingSystem_Dispatch(PID);
+			}
+
 			break;
 	}
 }
