@@ -316,6 +316,8 @@ void OperatingSystem_RestoreContext(int PID) {
 	// New values for the CPU registers are obtained from the PCB
 	Processor_CopyInSystemStack(MAINMEMORYSIZE-1,processTable[PID].copyOfPCRegister);
 	Processor_CopyInSystemStack(MAINMEMORYSIZE-2,processTable[PID].copyOfPSWRegister);
+	Processor_CopyInSystemStack(MAINMEMORYSIZE-3,processTable[PID].copyOfAccumulatorRegister);
+	Processor_SetAccumulator(processTable[PID].copyOfAccumulatorRegister);
 	
 	// Same thing for the MMU registers
 	MMU_SetBase(processTable[PID].initialPhysicalAddress);
@@ -343,6 +345,9 @@ void OperatingSystem_SaveContext(int PID) {
 	
 	// Load PSW saved for interrupt manager
 	processTable[PID].copyOfPSWRegister=Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
+
+	// Load Accumulator saved for interrupt manager 
+	processTable[PID].copyOfAccumulatorRegister = Processor_CopyFromSystemStack(MAINMEMORYSIZE - 3);
 	
 }
 
@@ -413,11 +418,14 @@ void OperatingSystem_HandleSystemCall() {
 
 		case SYSCALL_YIELD:
 			oldPID = executingProcessID;
+			// Obtain ready to run process with greater priority
 			PID = OperatingSystem_ShortTermScheduler();
-
+			// Check new process has the same priority
 			if (processTable[oldPID].priority == processTable[PID].priority) {
+				//Show message Process [oldPid] will transfer the control of the processor to process [PID]
 				ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
 					PID, programList[processTable[PID].programListIndex]->executableName);
+				// Transfer control
 				OperatingSystem_PreemptRunningProcess();
 				OperatingSystem_Dispatch(PID);
 			}
