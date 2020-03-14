@@ -12,6 +12,14 @@ d. ¿Afectarían los cambios anteriores a la implementación de alguna otra func
 de alguna estructura de datos?
 Al Struct PCB, habría que añadir el campo copyOfAccumulatorRegister.
 
+Ej 14. Estudia lo que hace la función OperatingSystem_TerminateProcess y en particular lo que pasa
+cuando el que termina es el SystemIdleProcess.
+Si no hay procesos no terminados y se está ejecutando el SystemIdleProcess, se finaliza el proceso y se
+apaga el simulador. Si hay procesos no terminados, se selecciona cuál será el siguiente en ejecutarse y 
+se asigna este al procesador.
+
+Ej 15.
+
 
 
 Mª Isabel Fernández Pérez, UO257829

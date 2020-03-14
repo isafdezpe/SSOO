@@ -385,10 +385,7 @@ void OperatingSystem_TerminateProcess() {
 		OperatingSystem_ReadyToShutdown();
 	}
 	// Select the next process to execute (sipID if no more user processes)
-	selectedProcess=OperatingSystem_ShortTermScheduler(USERPROCESSQUEUE);
-	
-	if (selectedProcess == NOPROCESS)
-		selectedProcess=OperatingSystem_ShortTermScheduler(DAEMONSQUEUE);
+	selectedProcess=OperatingSystem_ShortTermScheduler();
 
 	// Assign the processor to that process
 	OperatingSystem_Dispatch(selectedProcess);
