@@ -275,11 +275,18 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 int OperatingSystem_ShortTermScheduler() {
 	
 	int selectedProcess;
+	int i;
 
-	selectedProcess=OperatingSystem_ExtractFromReadyToRun(USERPROCESSQUEUE);
+	for (i = 0; i < NUMBEROFQUEUES; i++) {
+		selectedProcess=OperatingSystem_ExtractFromReadyToRun(i);
+		if (selectedProcess != NOPROCESS)
+			return selectedProcess;
+	}
 
-	if (selectedProcess == NOPROCESS)
-		selectedProcess = OperatingSystem_ExtractFromReadyToRun(DAEMONSQUEUE);
+	//selectedProcess=OperatingSystem_ExtractFromReadyToRun(USERPROCESSQUEUE);
+
+	/*if (selectedProcess == NOPROCESS)
+		selectedProcess = OperatingSystem_ExtractFromReadyToRun(DAEMONSQUEUE);*/
 
 	return selectedProcess;
 }
@@ -455,12 +462,12 @@ void OperatingSystem_PrintReadyToRunQueue() {
 	else
 	{
 		for (i = 0; i < numberOfReadyToRunProcesses[USERPROCESSQUEUE]; i++) {
-		if (i == numberOfReadyToRunProcesses[DAEMONSQUEUE] - 1)
-			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[USERPROCESSQUEUE][i],
-				processTable[readyToRunQueue[USERPROCESSQUEUE][i].info].priority, "\n");
-		else
-			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[USERPROCESSQUEUE][i],
-				processTable[readyToRunQueue[USERPROCESSQUEUE][i].info].priority, ", ");
+			if (i == numberOfReadyToRunProcesses[USERPROCESSQUEUE] - 1)
+				ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[USERPROCESSQUEUE][i],
+					processTable[readyToRunQueue[USERPROCESSQUEUE][i].info].priority, "\n");
+			else
+				ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[USERPROCESSQUEUE][i],
+					processTable[readyToRunQueue[USERPROCESSQUEUE][i].info].priority, ",");
 		}
 	}
 
@@ -470,12 +477,12 @@ void OperatingSystem_PrintReadyToRunQueue() {
 	else
 	{
 		for (i = 0; i < numberOfReadyToRunProcesses[DAEMONSQUEUE]; i++) {
-		if (i == numberOfReadyToRunProcesses[DAEMONSQUEUE] - 1)
-			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[DAEMONSQUEUE][i],
-				processTable[readyToRunQueue[DAEMONSQUEUE][i].info].priority, "\n");
-		else
-			ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[DAEMONSQUEUE][i],
-				processTable[readyToRunQueue[DAEMONSQUEUE][i].info].priority, ", ");
+			if (i == numberOfReadyToRunProcesses[DAEMONSQUEUE] - 1)
+				ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[DAEMONSQUEUE][i],
+					processTable[readyToRunQueue[DAEMONSQUEUE][i].info].priority, "\n");
+			else
+				ComputerSystem_DebugMessage(107, SHORTTERMSCHEDULE, readyToRunQueue[DAEMONSQUEUE][i],
+					processTable[readyToRunQueue[DAEMONSQUEUE][i].info].priority, ",");
 		}
 	}
 }
