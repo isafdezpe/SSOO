@@ -1,3 +1,5 @@
+Ejercicios realizados: 0-16.
+
 Ej 6. Ejecuta el simulador con el programa prog-V1-E6, que especifica un tamaño de proceso que supera el 
 máximo posible por proceso. Prueba a cambiar el tamaño a un valor válido, por ejemplo 50, y comprueba lo 
 que pasa. ¿Por qué hace lo que hace con el tamaño 65?
