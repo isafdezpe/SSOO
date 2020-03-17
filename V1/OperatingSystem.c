@@ -60,7 +60,7 @@ char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
 // Initial set of tasks of the OS
 void OperatingSystem_Initialize(int daemonsIndex) {
 	
-	int i, selectedProcess;
+	int i, selectedProcess, createdProcess;
 	FILE *programFile; // For load Operating System Code
 
 	// Obtain the memory requirements of the program
@@ -80,7 +80,11 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	OperatingSystem_PrepareDaemons(daemonsIndex);
 	
 	// Create all user processes from the information given in the command line
-	OperatingSystem_LongTermScheduler();
+	createdProcess = OperatingSystem_LongTermScheduler();
+
+	if (createdProcess < 1) {
+		OperatingSystem_ReadyToShutdown();
+	}
 	
 	if (strcmp(programList[processTable[sipID].programListIndex]->executableName,"SystemIdleProcess")) {
 		// Show red message "FATAL ERROR: Missing SIP program!\n"
