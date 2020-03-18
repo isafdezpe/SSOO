@@ -2,6 +2,7 @@
 #include "ProcessorBase.h"
 #include "OperatingSystem.h"
 #include "Buses.h"
+#include "Clock.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -10,6 +11,7 @@
 int Processor_FetchInstruction();
 void Processor_DecodeAndExecuteInstruction();
 void Processor_ManageInterrupts();
+void Processor_ShowTime(char);
 
 // External data
 extern char *InstructionNames[];
@@ -78,6 +80,7 @@ int Processor_FetchInstruction() {
 		// Show message: operationCode operand1 operand2
 		char codedInstruction[13]; // Coded instruction with separated fields to show
 		Processor_GetCodedInstruction(codedInstruction,registerIR_CPU);
+		Processor_ShowTime(HARDWARE);
 		ComputerSystem_DebugMessage(68, HARDWARE, codedInstruction);
 	}
 	else {
@@ -300,3 +303,7 @@ char * Processor_ShowPSW(){
 
 /////////////////////////////////////////////////////////
 //  New functions below this line  //////////////////////
+void Processor_ShowTime(char section) {
+	ComputerSystem_DebugMessage(100,section,"");
+	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?95:94,section,Clock_GetTime());
+}

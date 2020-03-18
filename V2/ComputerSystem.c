@@ -6,8 +6,11 @@
 #include "Processor.h"
 #include "Messages.h"
 #include "Asserts.h"
+#include "Clock.h"
 
 // Functions prototypes
+void ComputerSystem_PrintProgramList();
+void ComputerSystem_ShowTime(char);
 
 // Array that contains basic data about all daemons
 // and all user programs specified in the command line
@@ -45,6 +48,7 @@ void ComputerSystem_PowerOn(int argc, char *argv[], int paramIndex) {
 
 // Powers off the CS (the C program ends)
 void ComputerSystem_PowerOff() {
+	ComputerSystem_ShowTime(SHUTDOWN);
 	// Show message in red colour: "END of the simulation\n" 
 	ComputerSystem_DebugMessage(99,SHUTDOWN,"END of the simulation\n"); 
 	exit(0);
@@ -54,9 +58,15 @@ void ComputerSystem_PowerOff() {
 //  New functions below this line  //////////////////////
 void ComputerSystem_PrintProgramList() {
 	int i;
+	ComputerSystem_ShowTime(INIT);
 	ComputerSystem_DebugMessage(101, INIT); 
 	for (i = 1; i < PROGRAMSMAXNUMBER; i++) {
 		if (programList[i] != NULL)
 			ComputerSystem_DebugMessage(102, INIT, programList[i]->executableName, programList[i]->arrivalTime); 
 	}
+}
+
+void ComputerSystem_ShowTime(char section) {
+	ComputerSystem_DebugMessage(100,section,"");
+	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?95:94,section,Clock_GetTime());
 }

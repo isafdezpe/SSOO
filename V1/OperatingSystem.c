@@ -408,6 +408,7 @@ void OperatingSystem_HandleSystemCall() {
 	int systemCallID;
 	int oldPID;
 	int PID;
+	int queueId;
 
 	// Register A contains the identifier of the issued system call
 	systemCallID=Processor_GetRegisterA();
@@ -425,17 +426,20 @@ void OperatingSystem_HandleSystemCall() {
 			break;
 
 		case SYSCALL_YIELD:
-			oldPID = executingProcessID;
-			// Obtain ready to run process with greater priority
-			PID = OperatingSystem_ShortTermScheduler();
-			// Check new process has the same priority
-			if (processTable[oldPID].priority == processTable[PID].priority) {
+			queueId= processTable[executingProcessID].queueID;
+			if(numberOfReadyToRunProcesses[queueId] > 0) {
+				oldPID = executingProcessID;
+				// Obtain ready to run process with greater priority
+				PID = readyToRunQueue[queueId][0].info;
+				// Check new process has the same priority
+				if (processTable[oldPID].priority == processTable[PID].priority) {
 				//Show message Process [oldPid] will transfer the control of the processor to process [PID]
 				ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
 					PID, programList[processTable[PID].programListIndex]->executableName);
 				// Transfer control
 				OperatingSystem_PreemptRunningProcess();
 				OperatingSystem_Dispatch(PID);
+				}
 			}
 
 			break;
