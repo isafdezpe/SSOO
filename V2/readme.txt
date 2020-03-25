@@ -1,3 +1,3 @@
-Ejercicios realizados: 1, 2 (apartados a y b)
+Ejercicios realizados: 1, 2, 3, 4
 
 Mª Isabel Fernández Pérez, UO257829
