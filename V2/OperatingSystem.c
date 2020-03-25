@@ -27,6 +27,9 @@ void OperatingSystem_HandleException();
 void OperatingSystem_HandleSystemCall();
 void OperatingSystem_PrintReadyToRunQueue();
 void OperatingSystem_HandleClockInterrupt();
+void OperatingSystem_MoveToTheBlockedState(int);
+int OperatingSystem_ExtractFromBlocked();
+void OperatingSystem_CheckIfIsNecessaryToChangeProcess();
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -54,6 +57,10 @@ heapItem readyToRunQueue [NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
 int numberOfReadyToRunProcesses[NUMBEROFQUEUES]={0,0};
 
 char * queueNames [NUMBEROFQUEUES]={"USER","DAEMONS"}; 
+
+// Heap with blocked processes sort by when to wakeup
+heapItem sleepingProcessesQueue[PROCESSTABLEMAXSIZE];
+int numberOfSleepingProcesses=0; 
 
 // Variable containing the number of not terminated user processes
 int numberOfNotTerminatedUserProcesses=0;
@@ -257,10 +264,12 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	if (programList[processPLIndex]->type == DAEMONPROGRAM) {
 		processTable[PID].copyOfPCRegister=initialPhysicalAddress;
 		processTable[PID].copyOfPSWRegister= ((unsigned int) 1) << EXECUTION_MODE_BIT;
+		processTable[PID].copyOfAccumulatorRegister = 0;
 	} 
 	else {
 		processTable[PID].copyOfPCRegister=0;
 		processTable[PID].copyOfPSWRegister=0;
+		processTable[PID].copyOfAccumulatorRegister = 0;
 	}
 	processTable[PID].queueID=queueId;
 }
@@ -269,14 +278,29 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 // Move a process to the READY state: it will be inserted, depending on its priority, in
 // a queue of identifiers of READY processes
 void OperatingSystem_MoveToTheREADYState(int PID) {
-	
+	int previousState;
+
 	if (Heap_add(PID, readyToRunQueue[processTable[PID].queueID],QUEUE_PRIORITY ,&numberOfReadyToRunProcesses[processTable[PID].queueID] ,PROCESSTABLEMAXSIZE)>=0) {
-		OperatingSystem_ShowTime(SYSPROC);
-		ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[processTable[PID].state], statesNames[1]);
+		previousState = processTable[PID].state;
 		processTable[PID].state=READY;
+		OperatingSystem_ShowTime(SYSPROC);
+		ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[previousState], statesNames[1]);
 	} 
 
 	OperatingSystem_PrintReadyToRunQueue();
+}
+
+//Move a process to the BLOCKED state
+void OperatingSystem_MoveToTheBlockedState(int PID) {
+	int previousState;
+	
+	if (Heap_add(PID,sleepingProcessesQueue,QUEUE_WAKEUP,&numberOfSleepingProcesses,PROCESSTABLEMAXSIZE) >= 0) {
+		previousState = processTable[PID].state;
+		processTable[PID].state = BLOCKED;
+		OperatingSystem_ShowTime(SYSPROC);
+		ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[previousState], statesNames[3]);
+
+	}
 }
 
 
@@ -309,16 +333,27 @@ int OperatingSystem_ExtractFromReadyToRun(int queueId) {
 	return selectedProcess; 
 }
 
+// Return PID of the process with greater whenToWakeUp
+int OperatingSystem_ExtractFromBlocked() {
+	int selectedProcess = NOPROCESS;
+
+	selectedProcess = Heap_poll(sleepingProcessesQueue,QUEUE_WAKEUP,&numberOfSleepingProcesses);
+
+	return selectedProcess;
+}
+
 
 // Function that assigns the processor to a process
 void OperatingSystem_Dispatch(int PID) {
+	int previousState;
 
 	// The process identified by PID becomes the current executing process
 	executingProcessID=PID;
+	previousState = processTable[PID].state;
 	// Change the process' state
 	processTable[PID].state=EXECUTING;
 	OperatingSystem_ShowTime(SYSPROC);
-	ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[1], statesNames[2]);
+	ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[previousState], statesNames[2]);
 	// Modify hardware registers with appropriate values for the process identified by PID
 	OperatingSystem_RestoreContext(PID);
 }
@@ -381,10 +416,12 @@ void OperatingSystem_HandleException() {
 void OperatingSystem_TerminateProcess() {
   
 	int selectedProcess;
+	int previousState;
   	
+	previousState = processTable[executingProcessID].state;
 	processTable[executingProcessID].state=EXIT;
 	OperatingSystem_ShowTime(SYSPROC);
-	ComputerSystem_DebugMessage(110, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, statesNames[2], statesNames[4]);
+	ComputerSystem_DebugMessage(110, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, statesNames[previousState], statesNames[4]);
 	
 	if (programList[processTable[executingProcessID].programListIndex]->type==USERPROGRAM) 
 		// One more user process that has terminated
@@ -450,8 +487,13 @@ void OperatingSystem_HandleSystemCall() {
 				OperatingSystem_Dispatch(PID);
 				}
 			}
+			break;
 
-
+		case SYSCALL_SLEEP:
+			processTable[executingProcessID].whenToWakeUp = abs(Processor_GetAccumulator()) + numberOfClockInterrupts + 1;
+			OperatingSystem_SaveContext(executingProcessID);
+			OperatingSystem_MoveToTheBlockedState(executingProcessID);
+			OperatingSystem_PrintStatus();
 			break;
 	}
 }
@@ -510,7 +552,37 @@ void OperatingSystem_PrintReadyToRunQueue() {
 }
 
 void OperatingSystem_HandleClockInterrupt(){ 
+	int i, PID, numberOfProcessToWakeUp;
+
 	OperatingSystem_ShowTime(INTERRUPT);
 	numberOfClockInterrupts++;
 	ComputerSystem_DebugMessage(120,INTERRUPT,numberOfClockInterrupts);
+
+	for (i = 0; i < numberOfSleepingProcesses; i++) {
+		if (processTable[sleepingProcessesQueue[i].info].whenToWakeUp == numberOfClockInterrupts) {
+			PID = OperatingSystem_ExtractFromBlocked();
+			OperatingSystem_MoveToTheREADYState(PID);
+			numberOfProcessToWakeUp++;
+			i--;
+		}
+	}
+
+	if (numberOfProcessToWakeUp > 0) {
+		OperatingSystem_PrintStatus();
+		OperatingSystem_CheckIfIsNecessaryToChangeProcess();
+	}
 } 
+
+void OperatingSystem_CheckIfIsNecessaryToChangeProcess() {
+	int PIDWithMaxPriority;
+
+	PIDWithMaxPriority = Heap_getFirst(readyToRunQueue[USERPROCESSQUEUE], numberOfReadyToRunProcesses[USERPROCESSQUEUE]);
+	if (processTable[PIDWithMaxPriority].priority > processTable[executingProcessID].priority) {
+		OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+		ComputerSystem_DebugMessage(121,SHORTTERMSCHEDULE, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, 
+			PIDWithMaxPriority, programList[processTable[PIDWithMaxPriority].programListIndex] -> executableName);
+		OperatingSystem_PreemptRunningProcess();
+		OperatingSystem_Dispatch(PIDWithMaxPriority);
+		OperatingSystem_PrintStatus();
+	}
+}
