@@ -10,7 +10,7 @@
 #include <time.h>
 
 // Functions prototypes
-void OperatingSystem_PrepareDaemons();
+void OperatingSystem_PrepareDaemons(int);
 void OperatingSystem_PCBInitialization(int, int, int, int, int, int);
 void OperatingSystem_MoveToTheREADYState(int);
 void OperatingSystem_Dispatch(int);
@@ -45,6 +45,9 @@ int initialPID=PROCESSTABLEMAXSIZE - 1;
 
 // Begin indes for daemons in programList
 int baseDaemonsInProgramList; 
+
+// Number of clock interrupts occurred
+int numberOfClockInterrupts = 0;
 
 // Array that contains the identifiers of the READY processes
 heapItem readyToRunQueue [NUMBEROFQUEUES][PROCESSTABLEMAXSIZE];
@@ -291,11 +294,6 @@ int OperatingSystem_ShortTermScheduler() {
 			return selectedProcess;
 	}
 
-	//selectedProcess=OperatingSystem_ExtractFromReadyToRun(USERPROCESSQUEUE);
-
-	/*if (selectedProcess == NOPROCESS)
-		selectedProcess = OperatingSystem_ExtractFromReadyToRun(DAEMONSQUEUE);*/
-
 	return selectedProcess;
 }
 
@@ -467,6 +465,9 @@ void OperatingSystem_InterruptLogic(int entryPoint){
 		case EXCEPTION_BIT: // EXCEPTION_BIT=6
 			OperatingSystem_HandleException();
 			break;
+		case CLOCKINT_BIT: //CLOCKINT_BIT=9
+			OperatingSystem_HandleClockInterrupt();
+			break;
 	}
 
 }
@@ -509,5 +510,7 @@ void OperatingSystem_PrintReadyToRunQueue() {
 }
 
 void OperatingSystem_HandleClockInterrupt(){ 
-	return; 
+	OperatingSystem_ShowTime(INTERRUPT);
+	numberOfClockInterrupts++;
+	ComputerSystem_DebugMessage(120,INTERRUPT,numberOfClockInterrupts);
 } 
