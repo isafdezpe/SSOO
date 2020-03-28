@@ -167,6 +167,7 @@ int OperatingSystem_LongTermScheduler() {
 				numberOfNotTerminatedUserProcesses++;
 			// Move process to the ready state
 			OperatingSystem_MoveToTheREADYState(PID);
+			OperatingSystem_PrintStatus();
 			break;
 		}
 		
@@ -287,7 +288,7 @@ void OperatingSystem_MoveToTheREADYState(int PID) {
 		ComputerSystem_DebugMessage(110, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[previousState], statesNames[1]);
 	} 
 
-	OperatingSystem_PrintReadyToRunQueue();
+	//OperatingSystem_PrintReadyToRunQueue();
 }
 
 //Move a process to the BLOCKED state
@@ -409,6 +410,7 @@ void OperatingSystem_HandleException() {
 	ComputerSystem_DebugMessage(71,SYSPROC,executingProcessID,programList[processTable[executingProcessID].programListIndex]->executableName);
 	
 	OperatingSystem_TerminateProcess();
+	OperatingSystem_PrintStatus();
 }
 
 
@@ -468,6 +470,7 @@ void OperatingSystem_HandleSystemCall() {
 			// Show message: "Process [executingProcessID] has requested to terminate\n"
 			ComputerSystem_DebugMessage(73,SYSPROC,executingProcessID,programList[processTable[executingProcessID].programListIndex]->executableName);
 			OperatingSystem_TerminateProcess();
+			OperatingSystem_PrintStatus();
 			break;
 
 		case SYSCALL_YIELD:
@@ -478,13 +481,14 @@ void OperatingSystem_HandleSystemCall() {
 				PID = readyToRunQueue[queueId][0].info;
 				// Check new process has the same priority
 				if (processTable[oldPID].priority == processTable[PID].priority) {
-				//Show message Process [oldPid] will transfer the control of the processor to process [PID]
-				OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
-				ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
-					PID, programList[processTable[PID].programListIndex]->executableName);
-				// Transfer control
-				OperatingSystem_PreemptRunningProcess();
-				OperatingSystem_Dispatch(PID);
+					//Show message Process [oldPid] will transfer the control of the processor to process [PID]
+					OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+					ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
+						PID, programList[processTable[PID].programListIndex]->executableName);
+					// Transfer control
+					OperatingSystem_PreemptRunningProcess();
+					OperatingSystem_Dispatch(PID);
+					OperatingSystem_PrintStatus();
 				}
 			}
 			break;

@@ -1,3 +1,3 @@
-Ejercicios realizados: 5, 6
+Ejercicios realizados: 1-8
 
 Mª Isabel Fernández Pérez, UO257829
