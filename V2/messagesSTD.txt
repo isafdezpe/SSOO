@@ -17,4 +17,4 @@
 114,\n
 115,Process [@G%d – %s@@] will transfer the control of the processor to process [@G%d – %s@@]\n
 120,@CClock interrupt number [%d] has occurred\n
-121,Process [@G%d - %s] will bre thrown out of the processor by process [@G%d - %s]\n
+121,Process [@G%d - %s] will be thrown out of the processor by process [@G%d - %s]\n

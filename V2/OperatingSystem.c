@@ -167,11 +167,13 @@ int OperatingSystem_LongTermScheduler() {
 				numberOfNotTerminatedUserProcesses++;
 			// Move process to the ready state
 			OperatingSystem_MoveToTheREADYState(PID);
-			OperatingSystem_PrintStatus();
 			break;
 		}
 		
 	}
+
+	if (numberOfSuccessfullyCreatedProcesses > 1)
+		OperatingSystem_PrintStatus();
 
 	// Return the number of succesfully created processes
 	return numberOfSuccessfullyCreatedProcesses;
@@ -451,7 +453,6 @@ void OperatingSystem_TerminateProcess() {
 void OperatingSystem_HandleSystemCall() {
   
 	int systemCallID;
-	int oldPID;
 	int PID;
 	int queueId;
 
@@ -475,17 +476,16 @@ void OperatingSystem_HandleSystemCall() {
 
 		case SYSCALL_YIELD:
 			queueId= processTable[executingProcessID].queueID;
+			PID = readyToRunQueue[queueId][0].info;
 			if(numberOfReadyToRunProcesses[queueId] > 0) {
-				oldPID = executingProcessID;
-				// Obtain ready to run process with greater priority
-				PID = readyToRunQueue[queueId][0].info;
 				// Check new process has the same priority
-				if (processTable[oldPID].priority == processTable[PID].priority) {
+				if (processTable[executingProcessID].priority == processTable[PID].priority) {
 					//Show message Process [oldPid] will transfer the control of the processor to process [PID]
 					OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
-					ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
+					ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName,
 						PID, programList[processTable[PID].programListIndex]->executableName);
 					// Transfer control
+					PID = OperatingSystem_ShortTermScheduler();
 					OperatingSystem_PreemptRunningProcess();
 					OperatingSystem_Dispatch(PID);
 					OperatingSystem_PrintStatus();
@@ -497,6 +497,8 @@ void OperatingSystem_HandleSystemCall() {
 			processTable[executingProcessID].whenToWakeUp = abs(Processor_GetAccumulator()) + numberOfClockInterrupts + 1;
 			OperatingSystem_SaveContext(executingProcessID);
 			OperatingSystem_MoveToTheBlockedState(executingProcessID);
+			PID = OperatingSystem_ShortTermScheduler();
+			OperatingSystem_Dispatch(PID);
 			OperatingSystem_PrintStatus();
 			break;
 	}
@@ -556,7 +558,8 @@ void OperatingSystem_PrintReadyToRunQueue() {
 }
 
 void OperatingSystem_HandleClockInterrupt(){ 
-	int i, PID, numberOfProcessToWakeUp;
+	int i, PID;
+	int numberOfProcessToWakeUp = 0;
 
 	OperatingSystem_ShowTime(INTERRUPT);
 	numberOfClockInterrupts++;
@@ -581,11 +584,12 @@ void OperatingSystem_CheckIfIsNecessaryToChangeProcess() {
 	int PIDWithMaxPriority;
 
 	PIDWithMaxPriority = Heap_getFirst(readyToRunQueue[USERPROCESSQUEUE], numberOfReadyToRunProcesses[USERPROCESSQUEUE]);
-	if (processTable[PIDWithMaxPriority].priority > processTable[executingProcessID].priority) {
+	if (processTable[PIDWithMaxPriority].priority < processTable[executingProcessID].priority || processTable[executingProcessID].queueID == DAEMONSQUEUE) {
 		OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
 		ComputerSystem_DebugMessage(121,SHORTTERMSCHEDULE, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, 
 			PIDWithMaxPriority, programList[processTable[PIDWithMaxPriority].programListIndex] -> executableName);
 		OperatingSystem_PreemptRunningProcess();
+		PIDWithMaxPriority = OperatingSystem_ShortTermScheduler();
 		OperatingSystem_Dispatch(PIDWithMaxPriority);
 		OperatingSystem_PrintStatus();
 	}
