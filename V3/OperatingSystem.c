@@ -90,6 +90,10 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	// Include in program list  all system daemon processes
 	OperatingSystem_PrepareDaemons(daemonsIndex);
 	
+	// Insert programs of program list in arrivalTimeQueue
+	ComputerSystem_FillInArrivalTimeQueue();
+	OperatingSystem_PrintStatus();
+
 	// Create all user processes from the information given in the command line
 	createdProcess = OperatingSystem_LongTermScheduler();
 
@@ -142,7 +146,9 @@ int OperatingSystem_LongTermScheduler() {
 	int PID, i,
 		numberOfSuccessfullyCreatedProcesses=0;
 	
-	for (i=0; programList[i]!=NULL && i<PROGRAMSMAXNUMBER ; i++) {
+	while(OperatingSystem_IsThereANewProgram() == YES) {
+		i = Heap_poll(arrivalTimeQueue, QUEUE_ARRIVAL, &numberOfProgramsInArrivalTimeQueue);
+
 		if (programList[i]->type == DAEMONPROGRAM)
 			PID=OperatingSystem_CreateProcess(i, DAEMONSQUEUE);
 		else
@@ -169,8 +175,8 @@ int OperatingSystem_LongTermScheduler() {
 			OperatingSystem_MoveToTheREADYState(PID);
 			break;
 		}
-		
 	}
+	
 
 	if (numberOfSuccessfullyCreatedProcesses > 1)
 		OperatingSystem_PrintStatus();
@@ -558,7 +564,7 @@ void OperatingSystem_PrintReadyToRunQueue() {
 }
 
 void OperatingSystem_HandleClockInterrupt(){ 
-	int i, PID;
+	int i, PID, createdProcesses;
 	int numberOfProcessToWakeUp = 0;
 
 	OperatingSystem_ShowTime(INTERRUPT);
@@ -574,8 +580,13 @@ void OperatingSystem_HandleClockInterrupt(){
 		}
 	}
 
-	if (numberOfProcessToWakeUp > 0) {
-		OperatingSystem_PrintStatus();
+	createdProcesses = OperatingSystem_LongTermScheduler();
+
+	if (numberOfProcessToWakeUp > 0 || createdProcesses > 0) {
+		// if LTS creates at least 1 process, it calls to PrintStatus. This check is to not call it twice 
+		if (!(createdProcesses > 0))
+			OperatingSystem_PrintStatus();
+			
 		OperatingSystem_CheckIfIsNecessaryToChangeProcess();
 	}
 } 
@@ -593,4 +604,8 @@ void OperatingSystem_CheckIfIsNecessaryToChangeProcess() {
 		OperatingSystem_Dispatch(PIDWithMaxPriority);
 		OperatingSystem_PrintStatus();
 	}
+}
+
+int OperatingSystem_GetExecutingProcessID() {
+	return executingProcessID;
 }
