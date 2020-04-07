@@ -97,7 +97,7 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	// Create all user processes from the information given in the command line
 	createdProcess = OperatingSystem_LongTermScheduler();
 
-	if (createdProcess < 1) {
+	if (createdProcess < 1 && OperatingSystem_IsThereANewProgram() == EMPTYQUEUE) {
 		OperatingSystem_ReadyToShutdown();
 	}
 	
@@ -437,7 +437,7 @@ void OperatingSystem_TerminateProcess() {
 		// One more user process that has terminated
 		numberOfNotTerminatedUserProcesses--;
 	
-	if (numberOfNotTerminatedUserProcesses==0) {
+	if (numberOfNotTerminatedUserProcesses==0 && OperatingSystem_IsThereANewProgram() == EMPTYQUEUE && numberOfSleepingProcesses <= 0) {
 		if (executingProcessID==sipID) {
 			// finishing sipID, change PC to address of OS HALT instruction
 			OperatingSystem_TerminatingSIP();
@@ -581,6 +581,9 @@ void OperatingSystem_HandleClockInterrupt(){
 	}
 
 	createdProcesses = OperatingSystem_LongTermScheduler();
+
+	if (OperatingSystem_IsThereANewProgram() == EMPTYQUEUE && numberOfNotTerminatedUserProcesses <= 0)
+		OperatingSystem_ReadyToShutdown();
 
 	if (numberOfProcessToWakeUp > 0 || createdProcesses > 0) {
 		// if LTS creates at least 1 process, it calls to PrintStatus. This check is to not call it twice 
