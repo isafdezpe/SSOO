@@ -60,7 +60,7 @@ char * statesNames [5]={"NEW","READY","EXECUTING","BLOCKED","EXIT"};
 // Initial set of tasks of the OS
 void OperatingSystem_Initialize(int daemonsIndex) {
 	
-	int i, selectedProcess, createdProcess;
+	int i, selectedProcess;
 	FILE *programFile; // For load Operating System Code
 
 	// Obtain the memory requirements of the program
@@ -80,9 +80,9 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	OperatingSystem_PrepareDaemons(daemonsIndex);
 	
 	// Create all user processes from the information given in the command line
-	createdProcess = OperatingSystem_LongTermScheduler();
+	OperatingSystem_LongTermScheduler();
 
-	if (createdProcess < 1) {
+	if (numberOfNotTerminatedUserProcesses == 0) {
 		OperatingSystem_ReadyToShutdown();
 	}
 	
@@ -406,7 +406,6 @@ void OperatingSystem_TerminateProcess() {
 void OperatingSystem_HandleSystemCall() {
   
 	int systemCallID;
-	int oldPID;
 	int PID;
 	int queueId;
 
@@ -427,21 +426,19 @@ void OperatingSystem_HandleSystemCall() {
 
 		case SYSCALL_YIELD:
 			queueId= processTable[executingProcessID].queueID;
+			PID = readyToRunQueue[queueId][0].info;
 			if(numberOfReadyToRunProcesses[queueId] > 0) {
-				oldPID = executingProcessID;
-				// Obtain ready to run process with greater priority
-				PID = readyToRunQueue[queueId][0].info;
 				// Check new process has the same priority
-				if (processTable[oldPID].priority == processTable[PID].priority) {
-				//Show message Process [oldPid] will transfer the control of the processor to process [PID]
-				ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, oldPID, programList[processTable[oldPID].programListIndex]->executableName,
-					PID, programList[processTable[PID].programListIndex]->executableName);
-				// Transfer control
-				OperatingSystem_PreemptRunningProcess();
-				OperatingSystem_Dispatch(PID);
+				if (processTable[executingProcessID].priority == processTable[PID].priority) {
+					//Show message Process [oldPid] will transfer the control of the processor to process [PID]
+					ComputerSystem_DebugMessage(115, SHORTTERMSCHEDULE, executingProcessID, programList[processTable[executingProcessID].programListIndex]->executableName,
+						PID, programList[processTable[PID].programListIndex]->executableName);
+					// Transfer control
+					PID = OperatingSystem_ShortTermScheduler();
+					OperatingSystem_PreemptRunningProcess();
+					OperatingSystem_Dispatch(PID);
 				}
 			}
-
 			break;
 	}
 }
