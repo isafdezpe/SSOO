@@ -244,8 +244,8 @@ void Processor_DecodeAndExecuteInstruction() {
 			registerCTRL_CPU=CTRLREAD;
 			Buses_write_ControlBus_From_To(CPU,MMU);
 			// Copy the read data to the accumulator register
-			registerAccumulator_CPU= operand1 + operand2;
-			Processor_CheckOverflow(operand1,operand2);
+			registerAccumulator_CPU= operand1 + registerMBR_CPU.cell;
+			Processor_CheckOverflow(operand1,registerMBR_CPU.cell);
 			registerPC_CPU++;
 			break;
 

@@ -12,6 +12,7 @@ int Processor_FetchInstruction();
 void Processor_DecodeAndExecuteInstruction();
 void Processor_ManageInterrupts();
 void Processor_ShowTime(char);
+int Processor_GetRegisterA();
 
 // External data
 extern char *InstructionNames[];
@@ -26,6 +27,7 @@ BUSDATACELL registerMBR_CPU; // Memory Buffer Register
 int registerCTRL_CPU; // Control bus Register
 
 int registerA_CPU; // General purpose register
+int registerB_CPU; // Another general purpose register Exercise 1-a of V4
 
 int interruptLines_CPU; // Processor interrupt lines
 
@@ -130,7 +132,7 @@ void Processor_DecodeAndExecuteInstruction() {
 		// Instruction DIV
 		case DIV_INST: 
 			if (operand2 == 0)
-				Processor_RaiseInterrupt(EXCEPTION_BIT); 
+				Processor_RaiseException(DIVISIONBYZERO);
 			else {
 				registerAccumulator_CPU=operand1 / operand2;
 				registerPC_CPU++;
@@ -201,7 +203,7 @@ void Processor_DecodeAndExecuteInstruction() {
 		// Instruction HALT
 		case HALT_INST: 
 			if (!Processor_PSW_BitState(EXECUTION_MODE_BIT))
-				Processor_RaiseInterrupt(EXCEPTION_BIT);
+				Processor_RaiseException(INVALIDPROCESSORMODE);
 			else 
 				Processor_ActivatePSW_Bit(POWEROFF_BIT);	
 			break;
@@ -212,7 +214,7 @@ void Processor_DecodeAndExecuteInstruction() {
 			// Show message: " (PC: registerPC_CPU, Accumulator: registerAccumulator_CPU, PSW: registerPSW_CPU [Processor_ShowPSW()]\n
 			ComputerSystem_DebugMessage(130, HARDWARE,InstructionNames[operationCode],operand1,operand2,OperatingSystem_GetExecutingProcessID(),registerPC_CPU,registerAccumulator_CPU,registerPSW_CPU,Processor_ShowPSW());
 			if (!Processor_PSW_BitState(EXECUTION_MODE_BIT)) {
-				Processor_RaiseInterrupt(EXCEPTION_BIT);
+				Processor_RaiseException(INVALIDPROCESSORMODE);
 			} else {
 				// Not all operating system code is executed in simulated processor, but really must do it... 
 				OperatingSystem_InterruptLogic(operand1);
@@ -226,7 +228,7 @@ void Processor_DecodeAndExecuteInstruction() {
 		// Instruction IRET
 		case IRET_INST: // Return from a interrupt handle manager call
 			if (!Processor_PSW_BitState(EXECUTION_MODE_BIT)) {
-				Processor_RaiseInterrupt(EXCEPTION_BIT);
+				Processor_RaiseException(INVALIDPROCESSORMODE);
 			} else {
 				registerPC_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-1);
 				registerPSW_CPU=Processor_CopyFromSystemStack(MAINMEMORYSIZE-2);
@@ -244,14 +246,14 @@ void Processor_DecodeAndExecuteInstruction() {
 			registerCTRL_CPU=CTRLREAD;
 			Buses_write_ControlBus_From_To(CPU,MMU);
 			// Copy the read data to the accumulator register
-			registerAccumulator_CPU= operand1 + operand2;
-			Processor_CheckOverflow(operand1,operand2);
+			registerAccumulator_CPU= operand1 + registerMBR_CPU.cell;
+			Processor_CheckOverflow(operand1,registerMBR_CPU.cell);
 			registerPC_CPU++;
 			break;
 
 		// Unknown instruction
 		default : 
-			registerPC_CPU++;
+			Processor_RaiseException(INVALIDINSTRUCTION);
 			break;
 	}
 	
@@ -312,4 +314,8 @@ char * Processor_ShowPSW(){
 void Processor_ShowTime(char section) {
 	ComputerSystem_DebugMessage(100,section,"");
 	ComputerSystem_DebugMessage(Processor_PSW_BitState(EXECUTION_MODE_BIT)?95:94,section,Clock_GetTime());
+}
+
+int Processor_GetRegisterB() {
+  return registerB_CPU;
 }

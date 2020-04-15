@@ -94,6 +94,9 @@ void OperatingSystem_Initialize(int daemonsIndex) {
 	ComputerSystem_FillInArrivalTimeQueue();
 	OperatingSystem_PrintStatus();
 
+	// Initialize partition table
+	OperatingSystem_InitializePartitionTable();
+
 	// Create all user processes from the information given in the command line
 	OperatingSystem_LongTermScheduler();
 
@@ -412,11 +415,32 @@ void OperatingSystem_SaveContext(int PID) {
 
 // Exception management routine
 void OperatingSystem_HandleException() {
-  
-	// Show message "Process [executingProcessID] has generated an exception and is terminating\n"
-	OperatingSystem_ShowTime(SYSPROC);
-	ComputerSystem_DebugMessage(71,SYSPROC,executingProcessID,programList[processTable[executingProcessID].programListIndex]->executableName);
-	
+  switch (Processor_GetRegisterB()) {
+		case INVALIDADDRESS:
+			OperatingSystem_ShowTime(INTERRUPT);
+			ComputerSystem_DebugMessage(140,INTERRUPT,executingProcessID,
+				programList[processTable[executingProcessID].programListIndex]->executableName,"invalid address");
+			break;
+
+		case INVALIDPROCESSORMODE:
+			OperatingSystem_ShowTime(INTERRUPT);
+			ComputerSystem_DebugMessage(140,INTERRUPT,executingProcessID,
+				programList[processTable[executingProcessID].programListIndex]->executableName,"invalid processor mode");
+			break;
+
+		case DIVISIONBYZERO:
+			OperatingSystem_ShowTime(INTERRUPT);
+			ComputerSystem_DebugMessage(140,INTERRUPT,executingProcessID,
+				programList[processTable[executingProcessID].programListIndex]->executableName,"division by zero");
+			break;
+
+		case INVALIDINSTRUCTION:
+			OperatingSystem_ShowTime(INTERRUPT);
+			ComputerSystem_DebugMessage(140,INTERRUPT,executingProcessID,
+				programList[processTable[executingProcessID].programListIndex]->executableName,"invalid instruction");
+			break;
+	}
+
 	OperatingSystem_TerminateProcess();
 	OperatingSystem_PrintStatus();
 }
@@ -505,6 +529,14 @@ void OperatingSystem_HandleSystemCall() {
 			OperatingSystem_MoveToTheBlockedState(executingProcessID);
 			PID = OperatingSystem_ShortTermScheduler();
 			OperatingSystem_Dispatch(PID);
+			OperatingSystem_PrintStatus();
+			break;
+
+		default:
+			OperatingSystem_ShowTime(INTERRUPT);
+			ComputerSystem_DebugMessage(141,INTERRUPT,executingProcessID,
+				programList[processTable[executingProcessID].programListIndex]->executableName,systemCallID);
+			OperatingSystem_TerminateProcess();
 			OperatingSystem_PrintStatus();
 			break;
 	}

@@ -19,6 +19,9 @@
 
 #define NOPROCESS -1
 
+// Partitions configuration file name definition
+#define MEMCONFIG "MemConfig" // in OperatingSystem.h 
+
 // Definition of daemons queue and user process queue
 #define NUMBEROFQUEUES 2
 enum TypeOfReadyToRunProcessQueues { USERPROCESSQUEUE, DAEMONSQUEUE}; 
