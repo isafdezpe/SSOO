@@ -151,16 +151,21 @@ int OperatingSystem_LongTermScheduler() {
 		switch (PID)
 		{
 		case NOFREEENTRY:
+			OperatingSystem_ShowTime(ERROR);
 			ComputerSystem_DebugMessage(103, ERROR, programList[i] -> executableName);
 			break;
 		case PROGRAMDOESNOTEXIST:
+			OperatingSystem_ShowTime(ERROR);
 			ComputerSystem_DebugMessage(104, ERROR, programList[i] -> executableName, "it does not exist");
 			break;
 		case PROGRAMNOTVALID:
+			OperatingSystem_ShowTime(ERROR);
 			ComputerSystem_DebugMessage(104, ERROR, programList[i] -> executableName, "invalid priority or size");
 			break;
 		case TOOBIGPROCESS:
+			OperatingSystem_ShowTime(ERROR);
 			ComputerSystem_DebugMessage(105, ERROR, programList[i] -> executableName);
+			break;
 		default:
 			numberOfSuccessfullyCreatedProcesses++;
 			if (programList[i]->type==USERPROGRAM) 
