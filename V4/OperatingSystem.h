@@ -17,6 +17,8 @@
 #define NOFREEENTRY -3
 #define TOOBIGPROCESS -4
 
+#define MEMORYFULL -5
+
 #define NOPROCESS -1
 
 // Partitions configuration file name definition
@@ -48,6 +50,7 @@ typedef struct {
 	int programListIndex;
 	int queueID;
 	int whenToWakeUp;
+	int partitionIndex;
 } PCB;
 
 // These "extern" declaration enables other source code files to gain access

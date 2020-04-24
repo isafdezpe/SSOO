@@ -12,7 +12,7 @@ int Processor_FetchInstruction();
 void Processor_DecodeAndExecuteInstruction();
 void Processor_ManageInterrupts();
 void Processor_ShowTime(char);
-int Processor_GetRegisterA();
+int Processor_GetRegisterB();
 
 // External data
 extern char *InstructionNames[];
