@@ -340,6 +340,7 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	}
 	processTable[PID].queueID=queueId;
 	processTable[PID].partitionIndex=partitionIndex;
+	partitionsTable[partitionIndex].PID=PID;
 	OperatingSystem_ShowTime(SYSMEM);
 	ComputerSystem_DebugMessage(143,SYSMEM,partitionIndex,partitionsTable[partitionIndex].initAddress,
 		partitionsTable[partitionIndex].size,PID,programList[processTable[PID].programListIndex]->executableName);
@@ -519,6 +520,8 @@ void OperatingSystem_TerminateProcess() {
 	OperatingSystem_ShowTime(SYSPROC);
 	ComputerSystem_DebugMessage(110, SYSPROC, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, statesNames[previousState], statesNames[4]);
 	
+	OperatingSystem_ReleaseMainMemory();
+
 	if (programList[processTable[executingProcessID].programListIndex]->type==USERPROGRAM) 
 		// One more user process that has terminated
 		numberOfNotTerminatedUserProcesses--;
