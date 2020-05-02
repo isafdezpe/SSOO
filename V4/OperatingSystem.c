@@ -31,6 +31,7 @@ void OperatingSystem_MoveToTheBlockedState(int);
 int OperatingSystem_ExtractFromBlocked();
 void OperatingSystem_CheckIfIsNecessaryToChangeProcess();
 void OperatingSystem_ReleaseMainMemory();
+void OperatingSystem_ChangeProcess(int);
 
 // The process table
 PCB processTable[PROCESSTABLEMAXSIZE];
@@ -195,7 +196,7 @@ int OperatingSystem_LongTermScheduler() {
 	}
 	
 
-	if (numberOfSuccessfullyCreatedProcesses > 1)
+	if (numberOfSuccessfullyCreatedProcesses > 0)
 		OperatingSystem_PrintStatus();
 
 	// Return the number of succesfully created processes
@@ -344,9 +345,9 @@ void OperatingSystem_PCBInitialization(int PID, int initialPhysicalAddress, int 
 	OperatingSystem_ShowTime(SYSMEM);
 	ComputerSystem_DebugMessage(143,SYSMEM,partitionIndex,partitionsTable[partitionIndex].initAddress,
 		partitionsTable[partitionIndex].size,PID,programList[processTable[PID].programListIndex]->executableName);
-	OperatingSystem_ShowPartitionTable("after allocating memory");
-	OperatingSystem_ShowTime(SYSPROC);
+		OperatingSystem_ShowTime(SYSPROC);
 	ComputerSystem_DebugMessage(111, SYSPROC, PID, programList[processTable[PID].programListIndex] -> executableName, statesNames[0]);
+	OperatingSystem_ShowPartitionTable("after allocating memory");	
 }
 
 
@@ -694,16 +695,27 @@ void OperatingSystem_HandleClockInterrupt(){
 void OperatingSystem_CheckIfIsNecessaryToChangeProcess() {
 	int PIDWithMaxPriority;
 
-	PIDWithMaxPriority = Heap_getFirst(readyToRunQueue[USERPROCESSQUEUE], numberOfReadyToRunProcesses[USERPROCESSQUEUE]);
-	if (processTable[PIDWithMaxPriority].priority < processTable[executingProcessID].priority || processTable[executingProcessID].queueID == DAEMONSQUEUE) {
-		OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
-		ComputerSystem_DebugMessage(121,SHORTTERMSCHEDULE, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, 
-			PIDWithMaxPriority, programList[processTable[PIDWithMaxPriority].programListIndex] -> executableName);
-		OperatingSystem_PreemptRunningProcess();
-		PIDWithMaxPriority = OperatingSystem_ShortTermScheduler();
-		OperatingSystem_Dispatch(PIDWithMaxPriority);
-		OperatingSystem_PrintStatus();
+	if (numberOfReadyToRunProcesses[USERPROCESSQUEUE] > 0) {
+		PIDWithMaxPriority = Heap_getFirst(readyToRunQueue[USERPROCESSQUEUE], numberOfReadyToRunProcesses[USERPROCESSQUEUE]);
+		if (processTable[PIDWithMaxPriority].priority < processTable[executingProcessID].priority || processTable[executingProcessID].queueID == DAEMONSQUEUE) {
+			OperatingSystem_ChangeProcess(PIDWithMaxPriority);
+		}
+	} else if (processTable[executingProcessID].queueID != USERPROCESSQUEUE) {
+		PIDWithMaxPriority = Heap_getFirst(readyToRunQueue[DAEMONSQUEUE], numberOfReadyToRunProcesses[DAEMONSQUEUE]);
+		if (processTable[PIDWithMaxPriority].priority < processTable[executingProcessID].priority)
+			OperatingSystem_ChangeProcess(PIDWithMaxPriority);
 	}
+	
+}
+
+void OperatingSystem_ChangeProcess(int PID) {
+	OperatingSystem_ShowTime(SHORTTERMSCHEDULE);
+	ComputerSystem_DebugMessage(121,SHORTTERMSCHEDULE, executingProcessID, programList[processTable[executingProcessID].programListIndex] -> executableName, 
+		PID, programList[processTable[PID].programListIndex] -> executableName);
+	OperatingSystem_PreemptRunningProcess();
+	PID = OperatingSystem_ShortTermScheduler();
+	OperatingSystem_Dispatch(PID);
+	OperatingSystem_PrintStatus();
 }
 
 int OperatingSystem_GetExecutingProcessID() {

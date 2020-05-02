@@ -5,9 +5,9 @@
 //
 101,User program list:\n
 102,\tProgram [@C%s@@] with arrival time [@C%d@@]\n
-103,@RERROR: There are not free entries in the process table for the program [%s]\n
-104,@RERROR: Program [%s] is not valid [--- %s ---]\n
-105,@RERROR: Program [%s] is too big\n
+103,@RERROR: There are not free entries in the process table for the program [%s]@@\n
+104,@RERROR: Program [%s] is not valid [--- %s ---]@@\n
+105,@RERROR: Program [%s] is too big@@\n
 106,Ready-to-run processes queues:\n
 107, [@G%d@@,%d]%s
 110,Process [@G%d - %s@@] moving from the [@G%s@@] state to the [@G%s@@] state\n
@@ -16,5 +16,5 @@
 113,\t\tDAEMONS:
 114,\n
 115,Process [@G%d – %s@@] will transfer the control of the processor to process [@G%d – %s@@]\n
-120,@CClock interrupt number [%d] has occurred\n
-121,Process [@G%d - %s@@] will be thrown out of the processor by process [@G%d - %s]\n
+120,@CClock interrupt number [%d] has occurred@@\n
+121,Process [@G%d - %s@@] will be thrown out of the processor by process [@G%d - %s@@]\n

@@ -177,7 +177,7 @@ int OperatingSystem_LongTermScheduler() {
 		
 	}
 
-	if (numberOfSuccessfullyCreatedProcesses > 1)
+	if (numberOfSuccessfullyCreatedProcesses > 0)
 		OperatingSystem_PrintStatus();
 
 	// Return the number of succesfully created processes
