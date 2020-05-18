@@ -1,0 +1,41 @@
+Fernández Pérez, María Isabel
+UO257829
+
+Configuración de memoria para todas las ejecuciones:
+4
+12
+16
+96
+64
+16
+32
+
+Ejecuciones realizadas para probar la V4:
+./Simulator programDivCero
+./Simulator programInvalidInstruction
+./Simulator programInvalidSysCall
+./Simulator programInvalidAddress
+./Simulator programV3-a 8 programV3-b 3 programV3-c 5
+./Simulator programBetterFit1 programBetterFit2 programBetterFit3
+
+Programas de prueba:
+programDivCero 				- 	prueba que salte la excepción DIVISIONBYZERO
+programInvalidInstruction 	- 	prueba que salte la excepción INVALIDINSTRUCTION
+programInvalidSysCall 		- 	prueba que salte la excepción INVALIDPROCESSORMODE
+programInvalidAddress 		- 	prueba que salte la excepción INVALIDADDRESS
+programBetterFit1			-	prueba el mejor ajuste
+programBetterFit2			-	prueba el mejor ajuste
+programBetterFit3			-	prueba el mejor ajuste
+programV3-a 				- 	prueba de SYSCALL SLEEP y SYSCALL YIELD
+programV3-b 				- 	prueba de SYSCALL SLEEP y baja prioridad
+programV3-c 				- 	prueba de SYSCALL SLEEP y SYSCALL YIELD
+programV2-1a 				- 	prueba de SYSCALL YIELD
+programV2-1b 				- 	prueba de SYSCALL YIELD
+prog-V1-E0 					- 	prueba de MEMADD
+prog-V1-E3 					-	prueba de SYSCALL END
+prog-V1-E5-pri 				-	prueba con prioridad invalida
+prog-V1-E5-siz				-	prueba con tamaño inválido
+prog-V1-E6					-	prueba con tamaño demasiado grande
+prog-V1-E7					-	prueba con más instrucciones que el tamaño
+prog-V1-E12_1				- 	prueba de SYSCALL YIELD
+prog-V1-E12_2 				- 	prueba de SYSCALL YIELD

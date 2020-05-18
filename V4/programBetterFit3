@@ -1,0 +1,6 @@
+16
+5
+ADD 10 0
+DIV 5 1
+INC 1
+TRAP 3
